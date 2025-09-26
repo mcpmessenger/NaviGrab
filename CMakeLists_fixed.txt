@@ -71,18 +71,21 @@ target_link_libraries(navigrab_core
         Threads::Threads
 )
 
-# Create examples with proper source files
-add_executable(simple_example examples/simple_example.cpp)
+# Create examples with proper source files (relative to build directory)
+add_executable(simple_example ../examples/simple_example.cpp)
 target_link_libraries(simple_example navigrab_core)
 
-add_executable(screenshot_test_demo examples/screenshot_test_demo.cpp)
+add_executable(screenshot_test_demo ../examples/screenshot_test_demo.cpp)
 target_link_libraries(screenshot_test_demo navigrab_core)
 
-add_executable(comprehensive_demo examples/comprehensive_demo.cpp)
+add_executable(comprehensive_demo ../examples/comprehensive_demo.cpp)
 target_link_libraries(comprehensive_demo navigrab_core)
 
-add_executable(world_interface_demo examples/world_interface_demo.cpp)
+add_executable(world_interface_demo ../examples/world_interface_demo.cpp)
 target_link_libraries(world_interface_demo navigrab_core)
+
+add_executable(simple_real_demo ../examples/simple_real_demo.cpp)
+target_link_libraries(simple_real_demo navigrab_core)
 
 # Print configuration summary
 message(STATUS "")
