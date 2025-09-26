@@ -1,0 +1,109 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Visual Studio
+      uses: microsoft/setup-msbuild@v1.3
+      
+    - name: Setup CMake
+      uses: lukka/run-cmake@v4
+      with:
+        cmakeVersion: '3.28.1'
+        
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . -G "Visual Studio 17 2022" -A x64
+        
+    - name: Build
+      run: |
+        cmake --build build --config Release
+        
+    - name: Test
+      run: |
+        .\build\bin\Release\simple_example.exe
+        .\build\bin\Release\screenshot_test_demo.exe
+        
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: navigrab-build
+        path: build/bin/Release/
+        
+  test:
+    runs-on: windows-latest
+    needs: build
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: navigrab-build
+        path: build/bin/Release/
+        
+    - name: Run Tests
+      run: |
+        .\build\bin\Release\comprehensive_demo.exe
+        
+    - name: Test Web Interface
+      run: |
+        # Test HTML file exists and is valid
+        if (Test-Path "web_interface/navi_grab.html") {
+          Write-Host "Web interface file exists"
+        } else {
+          Write-Error "Web interface file not found"
+          exit 1
+        }
+        
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Security Scan
+      uses: github/super-linter@v4
+      env:
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VALIDATE_CPP: true
+        VALIDATE_HTML: true
+        VALIDATE_CSS: true
+        VALIDATE_JSON: true
+        VALIDATE_YAML: true
+        
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, test, security]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: navigrab-build
+        path: build/bin/Release/
+        
+    - name: Deploy to Staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add deployment commands here
+        
+    - name: Deploy to Production
+      run: |
+        echo "Deploying to production environment..."
+        # Add production deployment commands here

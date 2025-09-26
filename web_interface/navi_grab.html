@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navi Grab - C++ Playwright Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .results {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .result-item h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .result-item p {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .screenshot-preview {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .feature p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Navi Grab</h1>
+            <p>C++ Playwright Clone - Advanced Web Automation & Screenshot Tool</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Screenshot Capture Card -->
+            <div class="card">
+                <h2>📸 Screenshot Capture</h2>
+                
+                <div id="screenshot-status" class="status" style="display: none;"></div>
+                
+                <div class="form-group">
+                    <label for="screenshot-url">Website URL:</label>
+                    <input type="url" id="screenshot-url" placeholder="https://example.com" value="https://example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="screenshot-type">Screenshot Type:</label>
+                    <select id="screenshot-type">
+                        <option value="fullpage">Full Page</option>
+                        <option value="viewport">Viewport</option>
+                        <option value="element">Element Specific</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="element-selector-group" style="display: none;">
+                    <label for="element-selector">Element Selector:</label>
+                    <input type="text" id="element-selector" placeholder="h1, .class, #id">
+                </div>
+                
+                <div class="form-group">
+                    <label for="screenshot-format">Image Format:</label>
+                    <select id="screenshot-format">
+                        <option value="png">PNG</option>
+                        <option value="jpeg">JPEG</option>
+                        <option value="webp">WebP</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="captureScreenshot()">📸 Capture Screenshot</button>
+                <button class="btn btn-secondary" onclick="downloadScreenshot()">💾 Download Last Screenshot</button>
+                
+                <div id="screenshot-results" class="results" style="display: none;"></div>
+            </div>
+
+            <!-- Web Scraping Card -->
+            <div class="card">
+                <h2>🤖 Proactive Scraping</h2>
+                
+                <div id="scraping-status" class="status" style="display: none;"></div>
+                
+                <div class="form-group">
+                    <label for="scraping-url">Start URL:</label>
+                    <input type="url" id="scraping-url" placeholder="https://example.com" value="https://example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="max-depth">Max Depth:</label>
+                    <input type="number" id="max-depth" value="3" min="1" max="10">
+                </div>
+                
+                <div class="form-group">
+                    <label for="scraping-options">Scraping Options:</label>
+                    <textarea id="scraping-options" rows="4" placeholder='{"click_all_buttons": true, "follow_all_links": true, "take_screenshots": true}'></textarea>
+                </div>
+                
+                <button class="btn btn-success" onclick="startScraping()">🚀 Start Scraping</button>
+                <button class="btn btn-danger" onclick="stopScraping()">⏹️ Stop Scraping</button>
+                
+                <div class="progress-bar" id="scraping-progress" style="display: none;">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                
+                <div id="scraping-results" class="results" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🌐</div>
+                <h3>Browser Control</h3>
+                <p>Advanced browser automation with context management, navigation control, and lifecycle events.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🖱️</div>
+                <h3>DOM Interaction</h3>
+                <p>Robust element locators, actionability checks, and user action simulation with Blink engine.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📸</div>
+                <h3>Screenshot Capture</h3>
+                <p>Full-page, viewport, and element-specific screenshots with multiple image formats.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🤖</div>
+                <h3>Proactive Scraping</h3>
+                <p>Intelligent page traversal, automated interaction, and systematic data extraction.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">💾</div>
+                <h3>Storage Integration</h3>
+                <p>Flexible data persistence with SQLite and IndexedDB support, compression, and encryption.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🔌</div>
+                <h3>API Layer</h3>
+                <p>REST, WebSocket, and GraphQL APIs for seamless integration with external systems.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 C++ Playwright Clone - Built with Modern C++20 and MCP Communication Protocol</p>
+        </div>
+    </div>
+
+    <script>
+        let currentScreenshot = null;
+        let scrapingSession = null;
+        let scrapingInterval = null;
+
+        // Screenshot functionality
+        function captureScreenshot() {
+            const url = document.getElementById('screenshot-url').value;
+            const type = document.getElementById('screenshot-type').value;
+            const format = document.getElementById('screenshot-format').value;
+            const selector = document.getElementById('element-selector').value;
+            
+            if (!url) {
+                showStatus('screenshot-status', 'Please enter a URL', 'error');
+                return;
+            }
+            
+            showStatus('screenshot-status', 'Capturing screenshot...', 'info');
+            
+            // Simulate API call to C++ backend
+            setTimeout(() => {
+                const mockScreenshot = {
+                    url: url,
+                    type: type,
+                    format: format,
+                    timestamp: new Date().toISOString(),
+                    size: '1920x1080',
+                    fileSize: '2.5MB',
+                    path: `screenshot_${Date.now()}.${format}`
+                };
+                
+                currentScreenshot = mockScreenshot;
+                showScreenshotResults(mockScreenshot);
+                showStatus('screenshot-status', 'Screenshot captured successfully!', 'success');
+            }, 2000);
+        }
+        
+        function showScreenshotResults(screenshot) {
+            const resultsDiv = document.getElementById('screenshot-results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div class="result-item">
+                    <h4>📸 Screenshot Captured</h4>
+                    <p><strong>URL:</strong> ${screenshot.url}</p>
+                    <p><strong>Type:</strong> ${screenshot.type}</p>
+                    <p><strong>Format:</strong> ${screenshot.format}</p>
+                    <p><strong>Size:</strong> ${screenshot.size}</p>
+                    <p><strong>File Size:</strong> ${screenshot.fileSize}</p>
+                    <p><strong>Timestamp:</strong> ${screenshot.timestamp}</p>
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vY2sgU2NyZWVuc2hvdDwvdGV4dD48L3N2Zz4=" 
+                         alt="Screenshot Preview" class="screenshot-preview">
+                </div>
+            `;
+        }
+        
+        function downloadScreenshot() {
+            if (!currentScreenshot) {
+                showStatus('screenshot-status', 'No screenshot available to download', 'error');
+                return;
+            }
+            
+            // Simulate download
+            const link = document.createElement('a');
+            link.href = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+            link.download = currentScreenshot.path;
+            link.click();
+            
+            showStatus('screenshot-status', 'Screenshot downloaded!', 'success');
+        }
+
+        // Scraping functionality
+        function startScraping() {
+            const url = document.getElementById('scraping-url').value;
+            const maxDepth = document.getElementById('max-depth').value;
+            const options = document.getElementById('scraping-options').value;
+            
+            if (!url) {
+                showStatus('scraping-status', 'Please enter a start URL', 'error');
+                return;
+            }
+            
+            showStatus('scraping-status', 'Starting scraping session...', 'info');
+            document.getElementById('scraping-progress').style.display = 'block';
+            
+            // Simulate scraping progress
+            let progress = 0;
+            scrapingInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('progress-fill').style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(scrapingInterval);
+                    showScrapingResults();
+                    showStatus('scraping-status', 'Scraping completed successfully!', 'success');
+                }
+            }, 500);
+        }
+        
+        function stopScraping() {
+            if (scrapingInterval) {
+                clearInterval(scrapingInterval);
+                scrapingInterval = null;
+            }
+            
+            document.getElementById('scraping-progress').style.display = 'none';
+            showStatus('scraping-status', 'Scraping stopped', 'info');
+        }
+        
+        function showScrapingResults() {
+            const resultsDiv = document.getElementById('scraping-results');
+            resultsDiv.style.display = 'block';
+            
+            const mockResults = [
+                {
+                    url: 'https://example.com',
+                    title: 'Example Domain',
+                    screenshots: 3,
+                    dataPoints: 15,
+                    interactions: 8
+                },
+                {
+                    url: 'https://example.com/about',
+                    title: 'About Us',
+                    screenshots: 2,
+                    dataPoints: 12,
+                    interactions: 5
+                },
+                {
+                    url: 'https://example.com/contact',
+                    title: 'Contact',
+                    screenshots: 1,
+                    dataPoints: 8,
+                    interactions: 3
+                }
+            ];
+            
+            let html = '<h4>📊 Scraping Results</h4>';
+            mockResults.forEach((result, index) => {
+                html += `
+                    <div class="result-item">
+                        <h4>Page ${index + 1}: ${result.title}</h4>
+                        <p><strong>URL:</strong> ${result.url}</p>
+                        <p><strong>Screenshots:</strong> ${result.screenshots}</p>
+                        <p><strong>Data Points:</strong> ${result.dataPoints}</p>
+                        <p><strong>Interactions:</strong> ${result.interactions}</p>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // Utility functions
+        function showStatus(elementId, message, type) {
+            const statusDiv = document.getElementById(elementId);
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Event listeners
+        document.getElementById('screenshot-type').addEventListener('change', function() {
+            const elementGroup = document.getElementById('element-selector-group');
+            if (this.value === 'element') {
+                elementGroup.style.display = 'block';
+            } else {
+                elementGroup.style.display = 'none';
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Navi Grab initialized - C++ Playwright Clone Interface');
+        });
+    </script>
+</body>
+</html>

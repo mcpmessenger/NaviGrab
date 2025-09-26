@@ -1,0 +1,92 @@
+cmake_minimum_required(VERSION 3.20)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
+project(chromium-playwright
+    VERSION 1.0.0
+    DESCRIPTION "C++ Playwright Clone for Chromium Integration"
+    LANGUAGES CXX
+)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Set build type if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Compiler-specific options
+if(MSVC)
+    add_compile_options(/W4 /permissive- /Zc:__cplusplus)
+    add_compile_definitions(_WIN32_WINNT=0x0A00)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_options(-g -O0 -fsanitize=address -fsanitize=undefined)
+        add_link_options(-fsanitize=address -fsanitize=undefined)
+    endif()
+endif()
+
+# Set output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+# Include directories
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# Find required packages
+find_package(Threads REQUIRED)
+
+# Mock Chromium implementation (for testing without full Chromium)
+add_compile_definitions(USE_MOCK_CHROMIUM)
+
+# Create a simple library with just the headers
+add_library(chromium_playwright_core INTERFACE)
+
+# Set target properties
+set_target_properties(chromium_playwright_core PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+)
+
+# Include directories for the library
+target_include_directories(chromium_playwright_core
+    INTERFACE
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+# Compile definitions
+target_compile_definitions(chromium_playwright_core
+    INTERFACE
+        CHROMIUM_PLAYWRIGHT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+        CHROMIUM_PLAYWRIGHT_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+        CHROMIUM_PLAYWRIGHT_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+        USE_MOCK_CHROMIUM
+)
+
+# Create examples
+add_executable(simple_example ../examples/simple_example.cpp)
+target_link_libraries(simple_example chromium_playwright_core)
+
+add_executable(screenshot_test_demo ../examples/screenshot_test_demo.cpp)
+target_link_libraries(screenshot_test_demo chromium_playwright_core)
+
+add_executable(real_world_demo ../examples/real_world_demo.cpp)
+target_link_libraries(real_world_demo chromium_playwright_core)
+
+add_executable(comprehensive_demo ../examples/comprehensive_demo.cpp)
+target_link_libraries(comprehensive_demo chromium_playwright_core)
+
+# Print configuration summary
+message(STATUS "")
+message(STATUS "Chromium Playwright Configuration Summary:")
+message(STATUS "  Version: ${PROJECT_VERSION}")
+message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Use Mock Chromium: ON")
+message(STATUS "  Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "")
