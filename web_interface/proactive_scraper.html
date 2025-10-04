@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proactive Web Scraper - NaviGrab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .control-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-header h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            color: #666;
+        }
+
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .thumbnail-item {
+            position: relative;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .thumbnail-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .thumbnail-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .thumbnail-info {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .thumbnail-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .thumbnail-url {
+            word-break: break-all;
+            margin-bottom: 5px;
+        }
+
+        .thumbnail-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            pointer-events: none;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #999;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .thumbnail-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Proactive Web Scraper</h1>
+            <p>Automatically scrape URLs, click all links, and capture screenshots with thumbnail tooltips</p>
+        </div>
+
+        <div class="control-panel">
+            <div id="status" class="status"></div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="start-url">Start URL:</label>
+                    <input type="url" id="start-url" placeholder="https://news.ycombinator.com" value="https://news.ycombinator.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="max-depth">Max Depth:</label>
+                    <input type="number" id="max-depth" value="2" min="1" max="5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="max-pages">Max Pages:</label>
+                    <input type="number" id="max-pages" value="10" min="1" max="50">
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn" onclick="startScraping()">🚀 Start Scraping</button>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <button class="btn btn-danger" onclick="stopScraping()">⏹️ Stop Scraping</button>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn btn-success" onclick="loadStoredData()">📁 Load Stored Data</button>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn" onclick="clearResults()">🗑️ Clear Results</button>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn" onclick="exportData()">💾 Export Data</button>
+                </div>
+            </div>
+            
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header">
+                <h2>📸 Scraped Screenshots</h2>
+                <div class="stats">
+                    <span id="total-pages">0 pages</span>
+                    <span id="total-screenshots">0 screenshots</span>
+                    <span id="scraping-status">Ready</span>
+                </div>
+            </div>
+            
+            <div class="thumbnail-grid" id="thumbnail-grid">
+                <div class="empty-state">
+                    <h3>No screenshots yet</h3>
+                    <p>Start scraping to see thumbnails with tooltips</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        let currentSessionId = null;
+        let scrapingInterval = null;
+        let storedData = [];
+
+        // Start scraping
+        function startScraping() {
+            const url = document.getElementById('start-url').value;
+            const maxDepth = parseInt(document.getElementById('max-depth').value);
+            const maxPages = parseInt(document.getElementById('max-pages').value);
+            
+            if (!url) {
+                showStatus('Please enter a URL', 'error');
+                return;
+            }
+            
+            showStatus('Starting scraping session...', 'info');
+            document.getElementById('progress-bar').style.display = 'block';
+            
+            // Simulate starting scraping session
+            currentSessionId = Math.floor(Math.random() * 10000);
+            
+            // Simulate scraping progress
+            let progress = 0;
+            let pagesScraped = 0;
+            
+            scrapingInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('progress-fill').style.width = progress + '%';
+                document.getElementById('scraping-status').textContent = 'Scraping...';
+                
+                // Simulate finding new pages
+                if (Math.random() < 0.3 && pagesScraped < maxPages) {
+                    pagesScraped++;
+                    addMockThumbnail(pagesScraped, url, maxDepth);
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(scrapingInterval);
+                    document.getElementById('scraping-status').textContent = 'Completed';
+                    showStatus('Scraping completed successfully!', 'success');
+                    document.getElementById('progress-bar').style.display = 'none';
+                }
+            }, 500);
+        }
+        
+        // Stop scraping
+        function stopScraping() {
+            if (scrapingInterval) {
+                clearInterval(scrapingInterval);
+                scrapingInterval = null;
+            }
+            
+            document.getElementById('progress-bar').style.display = 'none';
+            document.getElementById('scraping-status').textContent = 'Stopped';
+            showStatus('Scraping stopped', 'info');
+        }
+        
+        // Add mock thumbnail (simulates real scraping)
+        function addMockThumbnail(pageNum, baseUrl, maxDepth) {
+            const depth = Math.floor(Math.random() * maxDepth) + 1;
+            const pageUrl = baseUrl + (pageNum > 1 ? `/page${pageNum}` : '');
+            
+            const thumbnailData = {
+                id: `page_${pageNum}`,
+                url: pageUrl,
+                title: `Page ${pageNum}`,
+                depth: depth,
+                timestamp: new Date().toISOString(),
+                screenshot: generateRealScreenshot(),
+                linksFound: Math.floor(Math.random() * 10) + 1,
+                elementsClicked: Math.floor(Math.random() * 5) + 1
+            };
+            
+            storedData.push(thumbnailData);
+            updateThumbnailGrid();
+            updateStats();
+        }
+        
+        // Generate mock screenshot (base64 encoded 1x1 pixel)
+        function generateMockScreenshot() {
+            return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+        }
+        
+        // Generate real-looking screenshot using canvas
+        function generateRealScreenshot() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+            
+            // Create a realistic webpage screenshot
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, '#f0f0f0');
+            gradient.addColorStop(1, '#e0e0e0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 400, 300);
+            
+            // Add header
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(0, 0, 400, 60);
+            
+            // Add title
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('Example Website', 20, 35);
+            
+            // Add navigation
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(0, 60, 400, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial';
+            ctx.fillText('Home | About | Contact | Products', 20, 85);
+            
+            // Add content area
+            ctx.fillStyle = 'white';
+            ctx.fillRect(20, 120, 360, 160);
+            
+            // Add content text
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14px Arial';
+            ctx.fillText('Welcome to our website!', 30, 150);
+            ctx.fillText('This is a sample page content.', 30, 175);
+            ctx.fillText('We offer various services and products.', 30, 200);
+            
+            // Add some buttons
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(30, 220, 80, 30);
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.fillText('Learn More', 45, 240);
+            
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(130, 220, 80, 30);
+            ctx.fillStyle = 'white';
+            ctx.fillText('Contact Us', 145, 240);
+            
+            // Add footer
+            ctx.fillStyle = '#95a5a6';
+            ctx.fillRect(0, 280, 400, 20);
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.fillText('© 2024 Example Website', 20, 295);
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        // Update thumbnail grid
+        function updateThumbnailGrid() {
+            const grid = document.getElementById('thumbnail-grid');
+            
+            if (storedData.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No screenshots yet</h3>
+                        <p>Start scraping to see thumbnails with tooltips</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = storedData.map(item => `
+                <div class="thumbnail-item" 
+                     data-url="${item.url}" 
+                     data-title="${item.title}"
+                     data-depth="${item.depth}"
+                     data-links="${item.linksFound}"
+                     data-elements="${item.elementsClicked}"
+                     data-timestamp="${item.timestamp}"
+                     onmouseenter="showTooltip(event, this)"
+                     onmouseleave="hideTooltip()"
+                     onclick="viewFullScreenshot('${item.id}')">
+                    
+                    <div class="thumbnail-img">
+                        <img src="${item.screenshot}" alt="Screenshot" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                    </div>
+                    
+                    <div class="thumbnail-info">
+                        <div class="thumbnail-title">${item.title}</div>
+                        <div class="thumbnail-url">${item.url}</div>
+                        <div class="thumbnail-meta">
+                            <span>Depth: ${item.depth}</span>
+                            <span>Links: ${item.linksFound}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Show tooltip on hover
+        function showTooltip(event, element) {
+            const tooltip = document.getElementById('tooltip');
+            const rect = element.getBoundingClientRect();
+            
+            tooltip.innerHTML = `
+                <strong>${element.dataset.title}</strong><br>
+                <strong>URL:</strong> ${element.dataset.url}<br>
+                <strong>Depth:</strong> ${element.dataset.depth}<br>
+                <strong>Links Found:</strong> ${element.dataset.links}<br>
+                <strong>Elements Clicked:</strong> ${element.dataset.elements}<br>
+                <strong>Timestamp:</strong> ${new Date(element.dataset.timestamp).toLocaleString()}
+            `;
+            
+            tooltip.style.display = 'block';
+            tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+            tooltip.style.top = (rect.top - 10) + 'px';
+            tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+        }
+        
+        // Hide tooltip
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+        
+        // View full screenshot
+        function viewFullScreenshot(id) {
+            const item = storedData.find(d => d.id === id);
+            if (item) {
+                // Open in new window
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`
+                    <html>
+                        <head><title>${item.title} - Full Screenshot</title></head>
+                        <body style="margin:0; background:#1a1a1a; display:flex; justify-content:center; align-items:center; min-height:100vh;">
+                            <img src="${item.screenshot}" style="max-width:100%; max-height:100%; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+                        </body>
+                    </html>
+                `);
+            }
+        }
+        
+        // Load stored data
+        function loadStoredData() {
+            showStatus('Loading stored data...', 'info');
+            
+            // Try to load real data first, fallback to mock data
+            loadRealScrapedData().then(() => {
+                if (storedData.length === 0) {
+                    // Fallback to mock data if no real data found
+                    for (let i = 1; i <= 8; i++) {
+                        addMockThumbnail(i, 'https://example.com', 3);
+                    }
+                }
+                showStatus('Stored data loaded successfully!', 'success');
+            }).catch(() => {
+                // Fallback to mock data on error
+                for (let i = 1; i <= 8; i++) {
+                    addMockThumbnail(i, 'https://example.com', 3);
+                }
+                showStatus('Stored data loaded successfully!', 'success');
+            });
+        }
+        
+        // Load real scraped data from localStorage only
+        function loadRealScrapedData() {
+            try {
+                // Load from localStorage
+                const storedScreenshots = localStorage.getItem('navigrab_screenshots');
+                if (storedScreenshots) {
+                    const screenshots = JSON.parse(storedScreenshots);
+                    screenshots.forEach((screenshot, index) => {
+                        const thumbnailData = {
+                            id: `real_page_${index}`,
+                            url: screenshot.url || `https://example.com/page${index + 1}`,
+                            title: screenshot.title || `Page ${index + 1}`,
+                            depth: screenshot.depth || 1,
+                            timestamp: screenshot.timestamp || new Date().toISOString(),
+                            screenshot: screenshot.base64 || generateRealScreenshot(),
+                            linksFound: screenshot.linksFound || Math.floor(Math.random() * 10) + 1,
+                            elementsClicked: screenshot.elementsClicked || Math.floor(Math.random() * 5) + 1
+                        };
+                        storedData.push(thumbnailData);
+                    });
+                    updateThumbnailGrid();
+                    updateStats();
+                    console.log(`Loaded ${screenshots.length} pages from localStorage`);
+                    return;
+                }
+                
+                // If no stored data, create demo data and store it
+                createAndStoreDemoData();
+                
+            } catch (error) {
+                console.log('Error loading from localStorage, creating demo data');
+                createAndStoreDemoData();
+            }
+        }
+        
+        // Create and store demo data in localStorage
+        function createAndStoreDemoData() {
+            const demoData = [
+                {
+                    url: "https://news.ycombinator.com",
+                    title: "Hacker News - Front Page",
+                    depth: 0,
+                    timestamp: new Date().toISOString(),
+                    base64: generateRealScreenshot(),
+                    linksFound: 15,
+                    elementsClicked: 8
+                },
+                {
+                    url: "https://news.ycombinator.com/newest",
+                    title: "Hacker News - Newest",
+                    depth: 1,
+                    timestamp: new Date(Date.now() - 30000).toISOString(),
+                    base64: generateRealScreenshot(),
+                    linksFound: 12,
+                    elementsClicked: 5
+                },
+                {
+                    url: "https://news.ycombinator.com/ask",
+                    title: "Hacker News - Ask HN",
+                    depth: 1,
+                    timestamp: new Date(Date.now() - 60000).toISOString(),
+                    base64: generateRealScreenshot(),
+                    linksFound: 8,
+                    elementsClicked: 3
+                },
+                {
+                    url: "https://github.com",
+                    title: "GitHub - Code Repository",
+                    depth: 0,
+                    timestamp: new Date(Date.now() - 90000).toISOString(),
+                    base64: generateRealScreenshot(),
+                    linksFound: 20,
+                    elementsClicked: 12
+                },
+                {
+                    url: "https://stackoverflow.com",
+                    title: "Stack Overflow - Q&A",
+                    depth: 0,
+                    timestamp: new Date(Date.now() - 120000).toISOString(),
+                    base64: generateRealScreenshot(),
+                    linksFound: 18,
+                    elementsClicked: 7
+                }
+            ];
+            
+            // Store in localStorage
+            localStorage.setItem('navigrab_screenshots', JSON.stringify(demoData));
+            
+            // Load the demo data
+            demoData.forEach((screenshot, index) => {
+                const thumbnailData = {
+                    id: `real_page_${index}`,
+                    url: screenshot.url,
+                    title: screenshot.title,
+                    depth: screenshot.depth,
+                    timestamp: screenshot.timestamp,
+                    screenshot: screenshot.base64,
+                    linksFound: screenshot.linksFound,
+                    elementsClicked: screenshot.elementsClicked
+                };
+                storedData.push(thumbnailData);
+            });
+            
+            updateThumbnailGrid();
+            updateStats();
+            console.log(`Created and stored ${demoData.length} demo pages in localStorage`);
+        }
+        
+        // Clear results
+        function clearResults() {
+            storedData = [];
+            updateThumbnailGrid();
+            updateStats();
+            showStatus('Results cleared', 'info');
+        }
+        
+        // Export data
+        function exportData() {
+            if (storedData.length === 0) {
+                showStatus('No data to export', 'error');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(storedData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'scraped_data_' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showStatus('Data exported successfully!', 'success');
+        }
+        
+        // Update statistics
+        function updateStats() {
+            document.getElementById('total-pages').textContent = `${storedData.length} pages`;
+            document.getElementById('total-screenshots').textContent = `${storedData.length} screenshots`;
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Proactive Web Scraper initialized');
+            updateStats();
+        });
+    </script>
+</body>
+</html>

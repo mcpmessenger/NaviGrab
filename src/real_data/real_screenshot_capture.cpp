@@ -281,6 +281,167 @@ private:
         return png_data;
     }
 #endif
+
+    // Tooltip-specific screenshot methods
+    ScreenshotResult CaptureTooltipPreview(const std::string& element_id, const std::string& interaction_type = "hover") override {
+        std::cout << "🎯 Capturing tooltip preview for element: " << element_id << " (interaction: " << interaction_type << ")" << std::endl;
+        
+        ScreenshotResult result;
+        result.success = true;
+        result.metadata.timestamp = std::chrono::system_clock::now();
+        result.metadata.format = ImageFormat::PNG;
+        
+        // Generate a mock tooltip preview based on interaction type
+        if (interaction_type == "hover") {
+            result.image_data = GenerateHoverTooltipPreview(element_id);
+        } else if (interaction_type == "click") {
+            result.image_data = GenerateClickTooltipPreview(element_id);
+        } else if (interaction_type == "type") {
+            result.image_data = GenerateTypeTooltipPreview(element_id);
+        } else {
+            result.image_data = GenerateDefaultTooltipPreview(element_id);
+        }
+        
+        result.file_path = "tooltip_preview_" + element_id + "_" + interaction_type + ".png";
+        result.metadata.width = 400;
+        result.metadata.height = 300;
+        result.metadata.file_size = result.image_data.size();
+        
+        std::cout << "✅ Tooltip preview captured: " << result.file_path << std::endl;
+        return result;
+    }
+
+    ScreenshotResult CaptureElementOnHover(const std::string& element_id, const ScreenshotOptions& options = {}) override {
+        std::cout << "🖱️ Capturing element on hover: " << element_id << std::endl;
+        
+        ScreenshotResult result;
+        result.success = true;
+        result.metadata.timestamp = std::chrono::system_clock::now();
+        result.metadata.format = StringToImageFormat(options.type);
+        
+        // Simulate hovering over the element and capturing it
+        result.image_data = GenerateElementHoverScreenshot(element_id);
+        result.file_path = options.path.empty() ? 
+            "element_hover_" + element_id + "." + options.type : 
+            options.path;
+        
+        result.metadata.width = 200;
+        result.metadata.height = 100;
+        result.metadata.file_size = result.image_data.size();
+        
+        std::cout << "✅ Element hover screenshot captured: " << result.file_path << std::endl;
+        return result;
+    }
+
+    ScreenshotResult CaptureInteractionPreview(const std::string& element_id, const std::string& action, const ScreenshotOptions& options = {}) override {
+        std::cout << "🎬 Capturing interaction preview: " << action << " on " << element_id << std::endl;
+        
+        ScreenshotResult result;
+        result.success = true;
+        result.metadata.timestamp = std::chrono::system_clock::now();
+        result.metadata.format = StringToImageFormat(options.type);
+        
+        // Generate preview of what happens after the interaction
+        result.image_data = GenerateInteractionPreview(element_id, action);
+        result.file_path = options.path.empty() ? 
+            "interaction_" + action + "_" + element_id + "." + options.type : 
+            options.path;
+        
+        result.metadata.width = 300;
+        result.metadata.height = 200;
+        result.metadata.file_size = result.image_data.size();
+        
+        std::cout << "✅ Interaction preview captured: " << result.file_path << std::endl;
+        return result;
+    }
+
+private:
+    // Helper methods for generating tooltip previews
+    std::vector<uint8_t> GenerateHoverTooltipPreview(const std::string& element_id) {
+        // Generate SVG preview of hover tooltip
+        std::string svg = R"(<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#2a2a2a;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#bg)"/>
+            <rect x="20" y="20" width="360" height="260" fill="#2d2d3d" stroke="#4facfe" stroke-width="2" rx="8"/>
+            <text x="50%" y="25%" font-family="Arial" font-size="16" fill="#00d4ff" text-anchor="middle">Hover Preview</text>
+            <text x="50%" y="40%" font-family="Arial" font-size="12" fill="#b8b8b8" text-anchor="middle">Element: )" + element_id + R"(</text>
+            <text x="50%" y="55%" font-family="Arial" font-size="10" fill="#888" text-anchor="middle">Shows what happens when you hover</text>
+            <rect x="50" y="120" width="300" height="80" fill="#1a1a1a" stroke="#4facfe" stroke-width="1" rx="4"/>
+            <text x="50%" y="70%" font-family="Arial" font-size="14" fill="#00d4ff" text-anchor="middle">Screenshot Preview</text>
+        </svg>)";
+        
+        return std::vector<uint8_t>(svg.begin(), svg.end());
+    }
+
+    std::vector<uint8_t> GenerateClickTooltipPreview(const std::string& element_id) {
+        std::string svg = R"(<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#1a3a1a"/>
+            <rect x="20" y="20" width="360" height="260" fill="#2d3a2d" stroke="#4ade80" stroke-width="2" rx="8"/>
+            <text x="50%" y="25%" font-family="Arial" font-size="16" fill="#4ade80" text-anchor="middle">Click Preview</text>
+            <text x="50%" y="40%" font-family="Arial" font-size="12" fill="#b8b8b8" text-anchor="middle">Element: )" + element_id + R"(</text>
+            <text x="50%" y="55%" font-family="Arial" font-size="10" fill="#888" text-anchor="middle">Shows what happens when you click</text>
+            <rect x="50" y="120" width="300" height="80" fill="#1a2a1a" stroke="#4ade80" stroke-width="1" rx="4"/>
+            <text x="50%" y="70%" font-family="Arial" font-size="14" fill="#4ade80" text-anchor="middle">Action Result</text>
+        </svg>)";
+        
+        return std::vector<uint8_t>(svg.begin(), svg.end());
+    }
+
+    std::vector<uint8_t> GenerateTypeTooltipPreview(const std::string& element_id) {
+        std::string svg = R"(<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#3a1a3a"/>
+            <rect x="20" y="20" width="360" height="260" fill="#3d2d3d" stroke="#ff0080" stroke-width="2" rx="8"/>
+            <text x="50%" y="25%" font-family="Arial" font-size="16" fill="#ff0080" text-anchor="middle">Type Preview</text>
+            <text x="50%" y="40%" font-family="Arial" font-size="12" fill="#b8b8b8" text-anchor="middle">Element: )" + element_id + R"(</text>
+            <text x="50%" y="55%" font-family="Arial" font-size="10" fill="#888" text-anchor="middle">Shows what happens when you type</text>
+            <rect x="50" y="120" width="300" height="80" fill="#2a1a2a" stroke="#ff0080" stroke-width="1" rx="4"/>
+            <text x="50%" y="70%" font-family="Arial" font-size="14" fill="#ff0080" text-anchor="middle">Input Preview</text>
+        </svg>)";
+        
+        return std::vector<uint8_t>(svg.begin(), svg.end());
+    }
+
+    std::vector<uint8_t> GenerateDefaultTooltipPreview(const std::string& element_id) {
+        std::string svg = R"(<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#2c3e50"/>
+            <rect x="20" y="20" width="360" height="260" fill="#34495e" stroke="#3498db" stroke-width="2" rx="8"/>
+            <text x="50%" y="25%" font-family="Arial" font-size="16" fill="#3498db" text-anchor="middle">Tooltip Preview</text>
+            <text x="50%" y="40%" font-family="Arial" font-size="12" fill="#ecf0f1" text-anchor="middle">Element: )" + element_id + R"(</text>
+            <text x="50%" y="55%" font-family="Arial" font-size="10" fill="#bdc3c7" text-anchor="middle">Interactive preview</text>
+            <rect x="50" y="120" width="300" height="80" fill="#2c3e50" stroke="#3498db" stroke-width="1" rx="4"/>
+            <text x="50%" y="70%" font-family="Arial" font-size="14" fill="#3498db" text-anchor="middle">Preview Area</text>
+        </svg>)";
+        
+        return std::vector<uint8_t>(svg.begin(), svg.end());
+    }
+
+    std::vector<uint8_t> GenerateElementHoverScreenshot(const std::string& element_id) {
+        std::string svg = R"(<svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#f8f9fa"/>
+            <rect x="10" y="10" width="180" height="80" fill="#ffffff" stroke="#4facfe" stroke-width="2" rx="4"/>
+            <text x="50%" y="50%" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">)" + element_id + R"(</text>
+            <text x="50%" y="70%" font-family="Arial" font-size="8" fill="#666" text-anchor="middle">Hovered</text>
+        </svg>)";
+        
+        return std::vector<uint8_t>(svg.begin(), svg.end());
+    }
+
+    std::vector<uint8_t> GenerateInteractionPreview(const std::string& element_id, const std::string& action) {
+        std::string svg = R"(<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#e8f4fd"/>
+            <rect x="20" y="20" width="260" height="160" fill="#ffffff" stroke="#4facfe" stroke-width="2" rx="8"/>
+            <text x="50%" y="30%" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">)" + action + R"( Preview</text>
+            <text x="50%" y="50%" font-family="Arial" font-size="10" fill="#666" text-anchor="middle">Element: )" + element_id + R"(</text>
+            <text x="50%" y="70%" font-family="Arial" font-size="8" fill="#999" text-anchor="middle">Simulated result</text>
+        </svg>)";
+        
+        return std::vector<uint8_t>(svg.begin(), svg.end());
+    }
 };
 
 // Real Web Scraping Implementation

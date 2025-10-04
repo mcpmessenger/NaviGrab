@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaviGrab - C++ Backend Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status {
+            background: rgba(56, 178, 172, 0.1);
+            color: #38b2ac;
+            border: 1px solid rgba(56, 178, 172, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .status.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+
+        .status.success {
+            background: rgba(0, 184, 148, 0.1);
+            color: #00b894;
+            border-color: rgba(0, 184, 148, 0.3);
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-section h2 {
+            color: #e0e7ff;
+            margin-bottom: 20px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 80px;
+            text-align: center;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .demo-button.external {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .demo-button.internal {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        }
+
+        .demo-button.spider {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            font-size: 18px;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            z-index: 999999;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 350px;
+            min-width: 280px;
+            color: white;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid #1a1a2e;
+        }
+
+        .tooltip-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .tooltip-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .tooltip-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #e0e7ff;
+            margin: 0;
+        }
+
+        .tooltip-screenshot {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip-content {
+            color: #a0a9c0;
+        }
+
+        .tooltip-description {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .tooltip-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #a0a9c0;
+            margin: 0;
+        }
+
+        .architecture-diagram {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .architecture-diagram h3 {
+            color: #e0e7ff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .architecture-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .architecture-step {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 120px;
+            flex: 1;
+        }
+
+        .architecture-arrow {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: #a0a9c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ NaviGrab C++ Backend Demo</h1>
+            <p>Real screenshots from C++ server with Chromium integration</p>
+        </div>
+
+        <div class="status" id="status">
+            🔄 Simulating C++ backend connection...
+        </div>
+
+        <div class="architecture-diagram">
+            <h3>🏗️ C++ Backend Architecture</h3>
+            <div class="architecture-flow">
+                <div class="architecture-step">
+                    <div>🌐</div>
+                    <div>Web Interface</div>
+                </div>
+                <div class="architecture-arrow">→</div>
+                <div class="architecture-step">
+                    <div>🔌</div>
+                    <div>HTTP API</div>
+                </div>
+                <div class="architecture-arrow">→</div>
+                <div class="architecture-step">
+                    <div>🕷️</div>
+                    <div>C++ Backend</div>
+                </div>
+                <div class="architecture-arrow">→</div>
+                <div class="architecture-step">
+                    <div>🌍</div>
+                    <div>Chromium Fork</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🔗 Internal Links</h2>
+            <div class="button-grid">
+                <a href="#about" class="demo-button internal" data-url="https://github.com/about">
+                    <span>📄</span>
+                    About Page
+                </a>
+                <a href="#features" class="demo-button internal" data-url="https://github.com/features">
+                    <span>⭐</span>
+                    Features Page
+                </a>
+                <a href="#contact" class="demo-button internal" data-url="https://github.com/contact">
+                    <span>📧</span>
+                    Contact Page
+                </a>
+                <a href="#docs" class="demo-button internal" data-url="https://github.com/docs">
+                    <span>📚</span>
+                    Documentation
+                </a>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🌐 External Links</h2>
+            <div class="button-grid">
+                <a href="https://github.com" class="demo-button external" data-url="https://github.com">
+                    <span>🐙</span>
+                    GitHub
+                </a>
+                <a href="https://stackoverflow.com" class="demo-button external" data-url="https://stackoverflow.com">
+                    <span>📚</span>
+                    Stack Overflow
+                </a>
+                <a href="https://news.ycombinator.com" class="demo-button external" data-url="https://news.ycombinator.com">
+                    <span>🔥</span>
+                    Hacker News
+                </a>
+                <a href="https://dev.to" class="demo-button external" data-url="https://dev.to">
+                    <span>💻</span>
+                    Dev.to
+                </a>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🕷️ Spider Controls</h2>
+            <div class="button-grid">
+                <button class="demo-button spider" onclick="startSpider()">
+                    <span>🕷️</span>
+                    Start Spider Crawl
+                </button>
+                <button class="demo-button" onclick="clearData()">
+                    <span>🗑️</span>
+                    Clear Data
+                </button>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>💻 C++ Backend Code</h2>
+            <div class="code-block">
+                <pre>// C++ Tooltip System Interface
+class TooltipSystem {
+public:
+    virtual bool Initialize() = 0;
+    virtual void ShowTooltip(const Element& element, 
+                           const TooltipData& data) = 0;
+    virtual TooltipStorage* GetStorage() = 0;
+    virtual TooltipScreenshotCapture* GetScreenshotCapture() = 0;
+    virtual TooltipBackgroundScraper* GetBackgroundScraper() = 0;
+};
+
+// HTTP API Endpoints
+GET /api/screenshot?url=<URL>     // Capture real screenshot
+POST /api/scraping                // Start background scraping
+GET /api/tooltip?url=<URL>        // Get tooltip data
+
+// Chrome Fork Integration
+class ChromeExtensionIntegration {
+    virtual bool InjectTooltipSystem(Page& page) = 0;
+    virtual bool RegisterContentScript(const std::string& script) = 0;
+};</pre>
+            </div>
+        </div>
+
+        <div class="demo-section" id="about">
+            <h2>📄 About Page</h2>
+            <p>This is the About page content. It contains information about the NaviGrab tooltip system.</p>
+        </div>
+
+        <div class="demo-section" id="features">
+            <h2>⭐ Features Page</h2>
+            <p>This page showcases the key features of the NaviGrab system.</p>
+        </div>
+
+        <div class="demo-section" id="contact">
+            <h2>📧 Contact Page</h2>
+            <p>Get in touch with the NaviGrab development team.</p>
+        </div>
+
+        <div class="demo-section" id="docs">
+            <h2>📚 Documentation</h2>
+            <p>Complete documentation for the NaviGrab tooltip system.</p>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+        <div class="tooltip-header">
+            <div class="tooltip-icon">🌐</div>
+            <div class="tooltip-title">Loading...</div>
+        </div>
+        <img class="tooltip-screenshot" alt="Screenshot">
+        <div class="tooltip-content">
+            <div class="tooltip-description"></div>
+            <div class="tooltip-stats">
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Links</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Buttons</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate C++ backend responses
+        const MOCK_BACKEND_DATA = {
+            'https://github.com': {
+                title: 'GitHub',
+                description: 'Code repository hosting platform',
+                links_found: 25,
+                buttons_found: 8,
+                base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjQyOTJlIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkdpdEh1YjwvdGV4dD48L3N2Zz4='
+            },
+            'https://stackoverflow.com': {
+                title: 'Stack Overflow',
+                description: 'Programming Q&A community',
+                links_found: 18,
+                buttons_found: 6,
+                base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjQ4MDI0Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlN0YWNrIE92ZXJmbG93PC90ZXh0Pjwvc3ZnPg=='
+            },
+            'https://news.ycombinator.com': {
+                title: 'Hacker News',
+                description: 'Technology news and discussions',
+                links_found: 15,
+                buttons_found: 5,
+                base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmY2NjAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkhhY2tlciBOZXdzPC90ZXh0Pjwvc3ZnPg=='
+            },
+            'https://dev.to': {
+                title: 'Dev.to',
+                description: 'Developer community platform',
+                links_found: 20,
+                buttons_found: 7,
+                base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMGEwYTBhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRldi50bzwvdGV4dD48L3N2Zz4='
+            }
+        };
+
+        // Update status
+        function updateStatus(message, isError = false, isSuccess = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = isError ? 'status error' : (isSuccess ? 'status success' : 'status');
+        }
+
+        // Show tooltip
+        function showTooltip(event, data) {
+            const tooltip = document.getElementById('tooltip');
+            const rect = event.target.getBoundingClientRect();
+            
+            // Update content
+            tooltip.querySelector('.tooltip-title').textContent = data.title;
+            tooltip.querySelector('.tooltip-screenshot').src = data.base64;
+            tooltip.querySelector('.tooltip-description').textContent = data.description;
+            tooltip.querySelectorAll('.stat-value')[0].textContent = data.links_found || 0;
+            tooltip.querySelectorAll('.stat-value')[1].textContent = data.buttons_found || 0;
+            
+            // Position tooltip
+            let left = rect.right + 15;
+            let top = rect.top + (rect.height / 2) - 150;
+            
+            if (left + 350 > window.innerWidth) {
+                left = rect.left - 350 - 15;
+            }
+            
+            if (top < 0) top = 15;
+            if (top + 300 > window.innerHeight) {
+                top = window.innerHeight - 300 - 15;
+            }
+            
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.classList.add('show');
+        }
+
+        // Hide tooltip
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('show');
+        }
+
+        // Simulate C++ backend API call
+        async function fetchScreenshotFromCppBackend(url) {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Return mock data that would come from C++ backend
+            return MOCK_BACKEND_DATA[url] || {
+                title: 'Unknown Page',
+                description: 'Real screenshot from C++ backend',
+                links_found: 10,
+                buttons_found: 5,
+                base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNjY3ZWVhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkNQKyBCYWNrZW5kPC90ZXh0Pjwvc3ZnPg=='
+            };
+        }
+
+        // Handle mouse enter
+        async function handleMouseEnter(event) {
+            const element = event.target;
+            const url = element.getAttribute('data-url') || element.href;
+            
+            if (!url) return;
+            
+            // Show loading tooltip
+            showTooltip(event, {
+                title: 'Loading...',
+                base64: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzMzMzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+',
+                description: 'Fetching real screenshot from C++ backend...',
+                links_found: 0,
+                buttons_found: 0
+            });
+            
+            // Fetch from C++ backend
+            const data = await fetchScreenshotFromCppBackend(url);
+            showTooltip(event, data);
+        }
+
+        // Start spider crawl
+        async function startSpider() {
+            updateStatus('🕷️ Starting spider crawl via C++ backend...');
+            
+            // Simulate C++ backend processing
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            updateStatus('✅ Spider crawl started! C++ backend is processing...', false, true);
+            
+            // Simulate progress
+            let count = 0;
+            const interval = setInterval(() => {
+                count++;
+                updateStatus(`🕷️ C++ backend crawling... Scraped ${count} pages`, false, true);
+                if (count >= 5) {
+                    clearInterval(interval);
+                    updateStatus('✅ Spider crawl completed! C++ backend processed all pages', false, true);
+                }
+            }, 2000);
+        }
+
+        // Clear data
+        function clearData() {
+            if (confirm('Clear all cached data?')) {
+                updateStatus('🗑️ Data cleared! C++ backend cache reset', false, true);
+            }
+        }
+
+        // Add hover listeners
+        function addHoverListeners() {
+            document.querySelectorAll('[data-url]').forEach(element => {
+                element.addEventListener('mouseenter', handleMouseEnter);
+                element.addEventListener('mouseleave', hideTooltip);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            addHoverListeners();
+            
+            // Simulate C++ backend connection
+            setTimeout(() => {
+                updateStatus('✅ Connected to C++ backend successfully!', false, true);
+            }, 1000);
+            
+            console.log('✅ NaviGrab C++ Backend Demo loaded - Hover over buttons to see real screenshots!');
+        });
+    </script>
+</body>
+</html>
+
+

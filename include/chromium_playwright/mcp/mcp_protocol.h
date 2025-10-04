@@ -21,8 +21,9 @@ class MCPError;
 using MessageId = std::string;
 using ModuleId = std::string;
 using Timestamp = std::chrono::system_clock::time_point;
-using JsonValue = std::variant<std::nullptr_t, bool, int64_t, double, std::string, 
-                               std::vector<JsonValue>, std::map<std::string, JsonValue>>;
+
+// Simple JSON value type (avoiding recursive definition)
+using JsonValue = std::string;  // Simplified for now - can be enhanced later
 
 // MCP Protocol Version
 constexpr int MCP_VERSION_MAJOR = 1;

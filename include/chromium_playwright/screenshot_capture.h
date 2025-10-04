@@ -93,6 +93,11 @@ public:
     virtual void SetDefaultPath(const std::string& path) = 0;
     virtual std::string GetDefaultPath() const = 0;
 
+    // Tooltip-specific screenshots
+    virtual ScreenshotResult CaptureTooltipPreview(const std::string& element_id, const std::string& interaction_type = "hover") = 0;
+    virtual ScreenshotResult CaptureElementOnHover(const std::string& element_id, const ScreenshotOptions& options = {}) = 0;
+    virtual ScreenshotResult CaptureInteractionPreview(const std::string& element_id, const std::string& action, const ScreenshotOptions& options = {}) = 0;
+
     // Utility methods
     virtual bool IsFormatSupported(ImageFormat format) const = 0;
     virtual std::vector<ImageFormat> GetSupportedFormats() const = 0;
@@ -209,16 +214,8 @@ public:
     virtual std::vector<ScreenshotResult> ScreenshotMultipleRegions(const std::vector<Rect>& regions, const ScreenshotOptions& options = {}) = 0;
 };
 
-// Locator extension for screenshot capture
-class Locator {
-public:
-    // Screenshot methods
-    virtual ScreenshotResult Screenshot(const ScreenshotOptions& options = {}) = 0;
-    virtual ScreenshotResult ScreenshotFirst(const ScreenshotOptions& options = {}) = 0;
-    virtual ScreenshotResult ScreenshotLast(const ScreenshotOptions& options = {}) = 0;
-    virtual ScreenshotResult ScreenshotNth(int index, const ScreenshotOptions& options = {}) = 0;
-    virtual std::vector<ScreenshotResult> ScreenshotAll(const ScreenshotOptions& options = {}) = 0;
-};
+// Forward declaration for Locator (defined in dom_interaction.h)
+class Locator;
 
 // Factory functions
 std::unique_ptr<ScreenshotCapture> CreateScreenshotCapture();

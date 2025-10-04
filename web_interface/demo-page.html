@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaviGrab Demo - Tooltip Functionality</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #a0a9c0;
+            margin-bottom: 30px;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-section h2 {
+            color: #e0e7ff;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .demo-section p {
+            color: #a0a9c0;
+            margin-bottom: 20px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 80px;
+            text-align: center;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .demo-button.secondary {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .demo-button.danger {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+
+        .demo-button.spider {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            font-size: 18px;
+        }
+
+        .demo-button.external {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .demo-button.internal {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        }
+
+        .icon {
+            font-size: 1.5em;
+        }
+
+        .spider-icon {
+            font-size: 2em;
+            animation: spiderCrawl 2s ease-in-out infinite;
+        }
+
+        @keyframes spiderCrawl {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(5deg); }
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .content-section h3 {
+            color: #e0e7ff;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .content-section p {
+            color: #a0a9c0;
+            margin-bottom: 15px;
+        }
+
+        .content-section ul {
+            color: #a0a9c0;
+            margin-left: 20px;
+        }
+
+        .content-section li {
+            margin-bottom: 8px;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .status-bar.hidden {
+            display: none;
+        }
+
+        .crawl-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00b894;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .instructions {
+            background: rgba(56, 178, 172, 0.1);
+            color: #38b2ac;
+            border: 1px solid rgba(56, 178, 172, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .instructions h4 {
+            margin-bottom: 10px;
+            color: #38b2ac;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        /* Universal Tooltip Styles */
+        .navigrab-tooltip {
+            position: fixed !important;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+            border: 1px solid rgba(102, 126, 234, 0.3) !important;
+            border-radius: 15px !important;
+            padding: 20px !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+            backdrop-filter: blur(20px) !important;
+            z-index: 999999 !important;
+            pointer-events: none !important;
+            opacity: 0 !important;
+            transform: translateY(10px) scale(0.95) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            max-width: 350px !important;
+            min-width: 280px !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            color: white !important;
+            font-size: 14px !important;
+            line-height: 1.4 !important;
+        }
+
+        .navigrab-tooltip.show {
+            opacity: 1 !important;
+            transform: translateY(0) scale(1) !important;
+        }
+
+        .navigrab-tooltip::before {
+            content: '' !important;
+            position: absolute !important;
+            top: -8px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 0 !important;
+            height: 0 !important;
+            border-left: 8px solid transparent !important;
+            border-right: 8px solid transparent !important;
+            border-bottom: 8px solid #1a1a2e !important;
+        }
+
+        .navigrab-tooltip-header {
+            display: flex !important;
+            align-items: center !important;
+            margin-bottom: 15px !important;
+            padding-bottom: 10px !important;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3) !important;
+        }
+
+        .navigrab-tooltip-icon {
+            width: 40px !important;
+            height: 40px !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border-radius: 10px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin-right: 15px !important;
+            font-size: 1.2em !important;
+        }
+
+        .navigrab-tooltip-title {
+            font-size: 1.2em !important;
+            font-weight: 600 !important;
+            color: #e0e7ff !important;
+            margin: 0 !important;
+        }
+
+        .navigrab-tooltip-screenshot {
+            width: 100% !important;
+            height: 150px !important;
+            object-fit: cover !important;
+            border-radius: 10px !important;
+            margin: 15px 0 !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .navigrab-tooltip-content {
+            color: #a0a9c0 !important;
+        }
+
+        .navigrab-tooltip-description {
+            margin-bottom: 15px !important;
+            font-size: 0.9em !important;
+            line-height: 1.5 !important;
+        }
+
+        .navigrab-tooltip-stats {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+            margin-top: 15px !important;
+        }
+
+        .navigrab-stat-item {
+            background: rgba(102, 126, 234, 0.1) !important;
+            padding: 8px 12px !important;
+            border-radius: 8px !important;
+            text-align: center !important;
+            border: 1px solid rgba(102, 126, 234, 0.2) !important;
+        }
+
+        .navigrab-stat-value {
+            font-size: 1.1em !important;
+            font-weight: 600 !important;
+            color: #667eea !important;
+            margin: 0 !important;
+        }
+
+        .navigrab-stat-label {
+            font-size: 0.9em !important;
+            color: #a0a9c0 !important;
+            margin: 0 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ NaviGrab Demo Page</h1>
+            <p>Demonstrating Tooltip Functionality with Internal & External Links</p>
+        </div>
+
+        <div class="instructions">
+            <h4>🎯 How to Test Tooltips:</h4>
+            <ol>
+                <li>Inject the NaviGrab Auto script into this page</li>
+                <li>Hover over the buttons below to see tooltips with real screenshots</li>
+                <li>Click the spider button to initiate a fresh crawl</li>
+                <li>Watch the status bar for crawling progress</li>
+            </ol>
+        </div>
+
+        <div class="demo-section">
+            <h2>🔗 Internal Page Links</h2>
+            <p>These buttons link to internal pages within this demo site. Hover over them to see tooltips with screenshots of the target pages.</p>
+            
+            <div class="button-grid">
+                <a href="#about" class="demo-button internal" data-url="#about">
+                    <span class="icon">📄</span>
+                    About Page
+                </a>
+                
+                <a href="#features" class="demo-button internal" data-url="#features">
+                    <span class="icon">⭐</span>
+                    Features Page
+                </a>
+                
+                <a href="#contact" class="demo-button internal" data-url="#contact">
+                    <span class="icon">📧</span>
+                    Contact Page
+                </a>
+                
+                <a href="#documentation" class="demo-button internal" data-url="#documentation">
+                    <span class="icon">📚</span>
+                    Documentation
+                </a>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🌐 External Links</h2>
+            <p>These buttons link to external websites. Hover over them to see tooltips with screenshots of the target sites.</p>
+            
+            <div class="button-grid">
+                <a href="https://github.com" class="demo-button external" target="_blank">
+                    <span class="icon">🐙</span>
+                    GitHub
+                </a>
+                
+                <a href="https://stackoverflow.com" class="demo-button external" target="_blank">
+                    <span class="icon">📚</span>
+                    Stack Overflow
+                </a>
+                
+                <a href="https://news.ycombinator.com" class="demo-button external" target="_blank">
+                    <span class="icon">🔥</span>
+                    Hacker News
+                </a>
+                
+                <a href="https://dev.to" class="demo-button external" target="_blank">
+                    <span class="icon">💻</span>
+                    Dev.to
+                </a>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🕷️ Spider Crawl Controls</h2>
+            <p>Use these buttons to control the proactive crawling system and see real-time status updates.</p>
+            
+            <div class="button-grid">
+                <button class="demo-button spider" onclick="startFreshCrawl()">
+                    <span class="spider-icon">🕷️</span>
+                    Start Fresh Crawl
+                </button>
+                
+                <button class="demo-button secondary" onclick="pauseCrawling()">
+                    <span class="icon">⏸️</span>
+                    Pause Crawling
+                </button>
+                
+                <button class="demo-button secondary" onclick="resumeCrawling()">
+                    <span class="icon">▶️</span>
+                    Resume Crawling
+                </button>
+                
+                <button class="demo-button danger" onclick="clearAllData()">
+                    <span class="icon">🗑️</span>
+                    Clear All Data
+                </button>
+            </div>
+        </div>
+
+        <div class="content-section" id="about">
+            <h3>📄 About Page</h3>
+            <p>This is the About page content. It contains information about the NaviGrab tooltip system and its capabilities.</p>
+            <ul>
+                <li>Proactive web scraping and screenshot capture</li>
+                <li>Beautiful tooltips with real page previews</li>
+                <li>Client-side storage using localStorage</li>
+                <li>Automatic link and button detection</li>
+            </ul>
+        </div>
+
+        <div class="content-section" id="features">
+            <h3>⭐ Features Page</h3>
+            <p>This page showcases the key features of the NaviGrab system.</p>
+            <ul>
+                <li>Real-time screenshot capture using html2canvas</li>
+                <li>Intelligent tooltip positioning and styling</li>
+                <li>Cross-domain link detection and handling</li>
+                <li>Automatic data persistence and retrieval</li>
+            </ul>
+        </div>
+
+        <div class="content-section" id="contact">
+            <h3>📧 Contact Page</h3>
+            <p>Get in touch with the NaviGrab development team.</p>
+            <ul>
+                <li>Email: contact@navigrab.dev</li>
+                <li>GitHub: github.com/navigrab</li>
+                <li>Documentation: docs.navigrab.dev</li>
+                <li>Support: support.navigrab.dev</li>
+            </ul>
+        </div>
+
+        <div class="content-section" id="documentation">
+            <h3>📚 Documentation</h3>
+            <p>Complete documentation for the NaviGrab tooltip system.</p>
+            <ul>
+                <li>Installation and setup guide</li>
+                <li>API reference and configuration options</li>
+                <li>Customization and theming guide</li>
+                <li>Troubleshooting and FAQ</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="status-bar" id="statusBar">
+        <span class="crawl-indicator"></span>
+        <span id="statusText">NaviGrab Auto Ready</span>
+    </div>
+
+    <script>
+        // Status management
+        function updateStatus(message, isActive = false) {
+            const statusBar = document.getElementById('statusBar');
+            const statusText = document.getElementById('statusText');
+            const indicator = statusBar.querySelector('.crawl-indicator');
+            
+            statusText.textContent = message;
+            statusBar.classList.remove('hidden');
+            
+            if (isActive) {
+                indicator.style.background = '#00b894';
+                indicator.style.animation = 'pulse 1s ease-in-out infinite';
+            } else {
+                indicator.style.background = '#6c5ce7';
+                indicator.style.animation = 'none';
+            }
+        }
+
+        // Crawl controls
+        function startFreshCrawl() {
+            updateStatus('🕷️ Starting fresh crawl...', true);
+            
+            // Simulate crawling process
+            setTimeout(() => {
+                updateStatus('📸 Capturing screenshots...', true);
+            }, 1000);
+            
+            setTimeout(() => {
+                updateStatus('💾 Storing data in localStorage...', true);
+            }, 2000);
+            
+            setTimeout(() => {
+                updateStatus('✅ Fresh crawl completed!', false);
+            }, 3000);
+            
+            // Inject the auto script if not already loaded
+            if (typeof window.navigrabAuto === 'undefined') {
+                const script = document.createElement('script');
+                script.src = './auto-navigrab.js';
+                script.onload = () => {
+                    window.navigrabAuto = true;
+                    console.log('✅ NaviGrab Auto script loaded');
+                };
+                document.head.appendChild(script);
+            }
+        }
+
+        function pauseCrawling() {
+            updateStatus('⏸️ Crawling paused', false);
+        }
+
+        function resumeCrawling() {
+            updateStatus('▶️ Crawling resumed', true);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all stored data?')) {
+                localStorage.removeItem('navigrab_auto_screenshots');
+                updateStatus('🗑️ All data cleared', false);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('NaviGrab Auto Ready - Hover over buttons to see tooltips!', false);
+            
+        // Auto-inject the real background scraper
+        setTimeout(() => {
+            const script = document.createElement('script');
+            script.src = './real-background-scraper.js';
+            script.onload = () => {
+                window.navigrabReal = true;
+                updateStatus('✅ Real Background Scraper loaded - Taking real screenshots!', false);
+            };
+            document.head.appendChild(script);
+        }, 1000);
+        });
+
+        // Smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

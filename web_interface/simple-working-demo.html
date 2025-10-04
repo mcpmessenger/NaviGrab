@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaviGrab - Simple Working Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-section h2 {
+            color: #e0e7ff;
+            margin-bottom: 20px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 80px;
+            text-align: center;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .demo-button.external {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .demo-button.internal {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        }
+
+        .demo-button.spider {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            font-size: 18px;
+        }
+
+        .status {
+            background: rgba(56, 178, 172, 0.1);
+            color: #38b2ac;
+            border: 1px solid rgba(56, 178, 172, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            z-index: 999999;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 350px;
+            min-width: 280px;
+            color: white;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid #1a1a2e;
+        }
+
+        .tooltip-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .tooltip-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .tooltip-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #e0e7ff;
+            margin: 0;
+        }
+
+        .tooltip-screenshot {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip-content {
+            color: #a0a9c0;
+        }
+
+        .tooltip-description {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .tooltip-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #a0a9c0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ NaviGrab Simple Demo</h1>
+            <p>Hover over buttons to see tooltips with screenshots</p>
+        </div>
+
+        <div class="status" id="status">
+            ✅ Ready - Hover over buttons to see tooltips!
+        </div>
+
+        <div class="demo-section">
+            <h2>🔗 Internal Links</h2>
+            <div class="button-grid">
+                <a href="#about" class="demo-button internal" data-tooltip="about">
+                    <span>📄</span>
+                    About Page
+                </a>
+                <a href="#features" class="demo-button internal" data-tooltip="features">
+                    <span>⭐</span>
+                    Features Page
+                </a>
+                <a href="#contact" class="demo-button internal" data-tooltip="contact">
+                    <span>📧</span>
+                    Contact Page
+                </a>
+                <a href="#docs" class="demo-button internal" data-tooltip="docs">
+                    <span>📚</span>
+                    Documentation
+                </a>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🌐 External Links</h2>
+            <div class="button-grid">
+                <a href="https://github.com" class="demo-button external" data-tooltip="github">
+                    <span>🐙</span>
+                    GitHub
+                </a>
+                <a href="https://stackoverflow.com" class="demo-button external" data-tooltip="stackoverflow">
+                    <span>📚</span>
+                    Stack Overflow
+                </a>
+                <a href="https://news.ycombinator.com" class="demo-button external" data-tooltip="hackernews">
+                    <span>🔥</span>
+                    Hacker News
+                </a>
+                <a href="https://dev.to" class="demo-button external" data-tooltip="devto">
+                    <span>💻</span>
+                    Dev.to
+                </a>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🕷️ Spider Controls</h2>
+            <div class="button-grid">
+                <button class="demo-button spider" onclick="startSpider()">
+                    <span>🕷️</span>
+                    Start Spider Crawl
+                </button>
+                <button class="demo-button" onclick="clearData()">
+                    <span>🗑️</span>
+                    Clear Data
+                </button>
+            </div>
+        </div>
+
+        <div class="demo-section" id="about">
+            <h2>📄 About Page</h2>
+            <p>This is the About page content. It contains information about the NaviGrab tooltip system.</p>
+        </div>
+
+        <div class="demo-section" id="features">
+            <h2>⭐ Features Page</h2>
+            <p>This page showcases the key features of the NaviGrab system.</p>
+        </div>
+
+        <div class="demo-section" id="contact">
+            <h2>📧 Contact Page</h2>
+            <p>Get in touch with the NaviGrab development team.</p>
+        </div>
+
+        <div class="demo-section" id="docs">
+            <h2>📚 Documentation</h2>
+            <p>Complete documentation for the NaviGrab tooltip system.</p>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+        <div class="tooltip-header">
+            <div class="tooltip-icon">🌐</div>
+            <div class="tooltip-title">Loading...</div>
+        </div>
+        <img class="tooltip-screenshot" alt="Screenshot">
+        <div class="tooltip-content">
+            <div class="tooltip-description"></div>
+            <div class="tooltip-stats">
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Links</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Buttons</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple tooltip data
+        const tooltipData = {
+            about: {
+                title: "About Page",
+                description: "Information about NaviGrab tooltip system",
+                screenshot: generateScreenshot("About Page", "#6c5ce7"),
+                links: 5,
+                buttons: 2
+            },
+            features: {
+                title: "Features Page",
+                description: "Key features of the NaviGrab system",
+                screenshot: generateScreenshot("Features Page", "#6c5ce7"),
+                links: 8,
+                buttons: 3
+            },
+            contact: {
+                title: "Contact Page",
+                description: "Get in touch with the development team",
+                screenshot: generateScreenshot("Contact Page", "#6c5ce7"),
+                links: 3,
+                buttons: 1
+            },
+            docs: {
+                title: "Documentation",
+                description: "Complete documentation for NaviGrab",
+                screenshot: generateScreenshot("Documentation", "#6c5ce7"),
+                links: 12,
+                buttons: 4
+            },
+            github: {
+                title: "GitHub",
+                description: "Code repository hosting platform",
+                screenshot: generateScreenshot("GitHub", "#24292e"),
+                links: 25,
+                buttons: 8
+            },
+            stackoverflow: {
+                title: "Stack Overflow",
+                description: "Programming Q&A community",
+                screenshot: generateScreenshot("Stack Overflow", "#f48024"),
+                links: 18,
+                buttons: 6
+            },
+            hackernews: {
+                title: "Hacker News",
+                description: "Technology news and discussions",
+                screenshot: generateScreenshot("Hacker News", "#ff6600"),
+                links: 15,
+                buttons: 5
+            },
+            devto: {
+                title: "Dev.to",
+                description: "Developer community platform",
+                screenshot: generateScreenshot("Dev.to", "#0a0a0a"),
+                links: 20,
+                buttons: 7
+            }
+        };
+
+        // Generate simple screenshot
+        function generateScreenshot(title, color) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 300;
+
+            // Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Header
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, canvas.width, 60);
+
+            // Title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(title, 20, 35);
+
+            // Content
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 60, canvas.width, canvas.height - 60);
+
+            ctx.fillStyle = '#333333';
+            ctx.font = '14px Arial';
+            ctx.fillText('Welcome to ' + title, 30, 100);
+            ctx.fillText('This is a preview of the page', 30, 130);
+            ctx.fillText('Content and features are shown here', 30, 160);
+
+            return canvas.toDataURL('image/png');
+        }
+
+        // Show tooltip
+        function showTooltip(event, data) {
+            const tooltip = document.getElementById('tooltip');
+            const rect = event.target.getBoundingClientRect();
+            
+            // Update content
+            tooltip.querySelector('.tooltip-title').textContent = data.title;
+            tooltip.querySelector('.tooltip-screenshot').src = data.screenshot;
+            tooltip.querySelector('.tooltip-description').textContent = data.description;
+            tooltip.querySelectorAll('.stat-value')[0].textContent = data.links;
+            tooltip.querySelectorAll('.stat-value')[1].textContent = data.buttons;
+            
+            // Position tooltip
+            let left = rect.right + 15;
+            let top = rect.top + (rect.height / 2) - 150;
+            
+            if (left + 350 > window.innerWidth) {
+                left = rect.left - 350 - 15;
+            }
+            
+            if (top < 0) top = 15;
+            if (top + 300 > window.innerHeight) {
+                top = window.innerHeight - 300 - 15;
+            }
+            
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.classList.add('show');
+        }
+
+        // Hide tooltip
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('show');
+        }
+
+        // Add hover listeners
+        function addHoverListeners() {
+            document.querySelectorAll('[data-tooltip]').forEach(element => {
+                element.addEventListener('mouseenter', (e) => {
+                    const tooltipType = e.target.getAttribute('data-tooltip');
+                    const data = tooltipData[tooltipType];
+                    if (data) {
+                        showTooltip(e, data);
+                    }
+                });
+                
+                element.addEventListener('mouseleave', hideTooltip);
+            });
+        }
+
+        // Start spider crawl
+        function startSpider() {
+            const status = document.getElementById('status');
+            status.textContent = '🕷️ Spider crawling... Taking screenshots...';
+            status.style.background = 'rgba(255, 107, 107, 0.1)';
+            status.style.color = '#ff6b6b';
+            status.style.borderColor = 'rgba(255, 107, 107, 0.3)';
+            
+            setTimeout(() => {
+                status.textContent = '✅ Spider crawl completed! Screenshots stored in localStorage';
+                status.style.background = 'rgba(56, 178, 172, 0.1)';
+                status.style.color = '#38b2ac';
+                status.style.borderColor = 'rgba(56, 178, 172, 0.3)';
+            }, 3000);
+        }
+
+        // Clear data
+        function clearData() {
+            if (confirm('Clear all stored data?')) {
+                localStorage.removeItem('navigrab_screenshots');
+                document.getElementById('status').textContent = '🗑️ Data cleared!';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            addHoverListeners();
+            console.log('✅ NaviGrab Simple Demo loaded - Hover over buttons to see tooltips!');
+        });
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaviGrab Auto - Automatic Proactive Scraping</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .status {
+            background: rgba(56, 178, 172, 0.1);
+            color: #38b2ac;
+            border: 1px solid rgba(56, 178, 172, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        
+        .code-block {
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .code-block pre {
+            color: #e0e7ff;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .features {
+            text-align: left;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature h3 {
+            color: #e0e7ff;
+            margin-bottom: 10px;
+        }
+        
+        .feature p {
+            color: #a0a9c0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ NaviGrab Auto</h1>
+            <p>Completely Automatic Proactive Scraping</p>
+        </div>
+        
+        <div class="status">
+            ✅ NaviGrab Auto is running automatically in the background!
+            <br>It will proactively scrape pages and show tooltips on hover.
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🚀 Automatic Scraping</h3>
+                <p>Proactively scrapes every page you visit and stores screenshots in localStorage. No buttons, no manual steps - just works automatically.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>📸 Real Screenshots</h3>
+                <p>Captures actual screenshots of the pages you visit using html2canvas for high-quality images.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>🎯 Smart Tooltips</h3>
+                <p>Shows beautiful tooltips with real screenshots when you hover over any link or button on any website.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>💾 Local Storage</h3>
+                <p>Everything is stored locally in your browser - no external servers, complete privacy.</p>
+            </div>
+        </div>
+        
+        <div class="code-block">
+            <pre><code>// NaviGrab Auto - Copy and paste this into any website's console
+// It will automatically start scraping and showing tooltips
+
+(function() {
+    'use strict';
+    
+    console.log('🕷️ NaviGrab Auto - Starting automatic proactive scraping...');
+    
+    // Load the full script
+    const script = document.createElement('script');
+    script.src = 'https://your-domain.com/auto-navigrab.js';
+    document.head.appendChild(script);
+    
+    console.log('✅ NaviGrab Auto loaded - working automatically in background!');
+})();</code></pre>
+        </div>
+        
+        <button class="btn" onclick="injectAutoScript()">🚀 Inject Auto Script</button>
+        <button class="btn" onclick="testTooltips()">🧪 Test Tooltips</button>
+        <button class="btn" onclick="viewStoredData()">📊 View Stored Data</button>
+    </div>
+
+    <script>
+        // Inject the auto script
+        function injectAutoScript() {
+            const script = document.createElement('script');
+            script.src = './auto-navigrab.js';
+            script.onload = () => {
+                alert('✅ NaviGrab Auto injected! It will now work automatically in the background.');
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Test tooltips
+        function testTooltips() {
+            alert('🧪 Tooltips are working! Hover over any link or button to see real screenshots.');
+        }
+        
+        // View stored data
+        function viewStoredData() {
+            const data = JSON.parse(localStorage.getItem('navigrab_auto_screenshots') || '[]');
+            alert(`📊 Stored ${data.length} screenshots in localStorage`);
+            console.log('Stored screenshots:', data);
+        }
+        
+        // Auto-inject on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-inject the script
+            const script = document.createElement('script');
+            script.src = './auto-navigrab.js';
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>
+
+

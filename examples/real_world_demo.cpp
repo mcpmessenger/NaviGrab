@@ -7,7 +7,7 @@
 #include <thread>
 
 // Include our new modules
-#include "chromium_playwright/image_processing/image_encoder.h"
+#include "chromium_playwright/screenshot_capture.h"
 #include "chromium_playwright/network/http_client.h"
 #include "chromium_playwright/dom/blink_dom_agent.h"
 

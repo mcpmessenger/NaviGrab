@@ -222,58 +222,8 @@ public:
     virtual LocatorOptions GetOptions() const = 0;
 };
 
-// Page extension for DOM interaction
-class Page {
-public:
-    // Locator creation methods
-    virtual std::unique_ptr<Locator> GetByCss(const std::string& selector) = 0;
-    virtual std::unique_ptr<Locator> GetByXPath(const std::string& expression) = 0;
-    virtual std::unique_ptr<Locator> GetByRole(const std::string& role, const std::string& name = "") = 0;
-    virtual std::unique_ptr<Locator> GetByText(const std::string& text, const LocatorOptions& options = {}) = 0;
-    virtual std::unique_ptr<Locator> GetByLabel(const std::string& label) = 0;
-    virtual std::unique_ptr<Locator> GetByPlaceholder(const std::string& placeholder) = 0;
-    virtual std::unique_ptr<Locator> GetByAltText(const std::string& alt_text) = 0;
-    virtual std::unique_ptr<Locator> GetByTitle(const std::string& title) = 0;
-    virtual std::unique_ptr<Locator> GetByTestId(const std::string& test_id) = 0;
-    virtual std::unique_ptr<Locator> GetByNth(const std::string& selector, int nth) = 0;
-
-    // Generic locator creation
-    virtual std::unique_ptr<Locator> GetByLocator(const LocatorOptions& options) = 0;
-
-    // Global actions
-    virtual bool Click(const std::string& selector, const ClickOptions& options = {}) = 0;
-    virtual bool Type(const std::string& selector, const std::string& text, const TypeOptions& options = {}) = 0;
-    virtual bool Fill(const std::string& selector, const std::string& text, const FillOptions& options = {}) = 0;
-    virtual bool Hover(const std::string& selector, const HoverOptions& options = {}) = 0;
-    virtual bool Check(const std::string& selector, const ClickOptions& options = {}) = 0;
-    virtual bool Uncheck(const std::string& selector, const ClickOptions& options = {}) = 0;
-    virtual bool SelectOption(const std::string& selector, const std::vector<std::string>& values, const SelectOptions& options = {}) = 0;
-
-    // Keyboard actions
-    virtual bool PressKey(const std::string& key) = 0;
-    virtual bool PressKeySequence(const std::vector<std::string>& keys) = 0;
-    virtual bool PressKeyWithModifiers(const std::string& key, const std::vector<std::string>& modifiers) = 0;
-
-    // Mouse actions
-    virtual bool MouseMove(double x, double y) = 0;
-    virtual bool MouseClick(double x, double y, const ClickOptions& options = {}) = 0;
-    virtual bool MouseDown(const ClickOptions& options = {}) = 0;
-    virtual bool MouseUp(const ClickOptions& options = {}) = 0;
-    virtual bool MouseWheel(double delta_x, double delta_y) = 0;
-
-    // Touch actions
-    virtual bool TouchStart(const std::vector<std::map<std::string, double>>& touches) = 0;
-    virtual bool TouchMove(const std::vector<std::map<std::string, double>>& touches) = 0;
-    virtual bool TouchEnd() = 0;
-
-    // Wait for elements
-    virtual std::unique_ptr<ElementHandle> WaitForElement(const std::string& selector, 
-                                                         const std::chrono::milliseconds& timeout = std::chrono::milliseconds(30000)) = 0;
-    virtual bool WaitForElementVisible(const std::string& selector, 
-                                     const std::chrono::milliseconds& timeout = std::chrono::milliseconds(30000)) = 0;
-    virtual bool WaitForElementHidden(const std::string& selector, 
-                                     const std::chrono::milliseconds& timeout = std::chrono::milliseconds(30000)) = 0;
-};
+// Forward declaration for Page (defined in browser_control.h)
+class Page;
 
 // Factory functions
 std::unique_ptr<Locator> CreateLocator(const LocatorOptions& options, Page* page);

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaviGrab Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 20px;
+        }
+        .button:hover {
+            background: #764ba2;
+        }
+        .status {
+            background: rgba(0, 184, 148, 0.2);
+            color: #00b894;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .screenshot {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🕷️ NaviGrab Test</h1>
+        <p>Simple test to see if the page loads</p>
+        
+        <div class="status" id="status">
+            ✅ Page loaded successfully!
+        </div>
+        
+        <button class="button" onclick="testFunction()">
+            🧪 Test Button
+        </button>
+        
+        <button class="button" onclick="captureScreenshot()">
+            📸 Capture Screenshot
+        </button>
+        
+        <div id="result"></div>
+        <img id="screenshot" class="screenshot" style="display: none;">
+    </div>
+
+    <script>
+        function testFunction() {
+            document.getElementById('status').textContent = '✅ Test button clicked! JavaScript is working.';
+            document.getElementById('status').style.background = 'rgba(0, 184, 148, 0.2)';
+            document.getElementById('status').style.color = '#00b894';
+        }
+        
+        function captureScreenshot() {
+            document.getElementById('status').textContent = '📸 Capturing screenshot...';
+            document.getElementById('status').style.background = 'rgba(255, 193, 7, 0.2)';
+            document.getElementById('status').style.color = '#ffc107';
+            
+            // Simple test - just show a message
+            setTimeout(() => {
+                document.getElementById('status').textContent = '✅ Screenshot test completed!';
+                document.getElementById('status').style.background = 'rgba(0, 184, 148, 0.2)';
+                document.getElementById('status').style.color = '#00b894';
+            }, 2000);
+        }
+        
+        console.log('✅ NaviGrab Test page loaded successfully!');
+    </script>
+</body>
+</html>
+
+

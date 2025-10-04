@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaviGrab Server-Based Screenshot Capture</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status {
+            background: rgba(56, 178, 172, 0.1);
+            color: #38b2ac;
+            border: 1px solid rgba(56, 178, 172, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .status.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+
+        .status.success {
+            background: rgba(0, 184, 148, 0.1);
+            color: #00b894;
+            border-color: rgba(0, 184, 148, 0.3);
+        }
+
+        .status.warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-panel h2 {
+            color: #e0e7ff;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a0a9c0;
+            font-weight: 500;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 14px;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 80px;
+            text-align: center;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .demo-button.primary {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .demo-button.secondary {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        }
+
+        .demo-button.warning {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        }
+
+        .demo-button.external {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .demo-button.internal {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        }
+
+        .demo-button.capture {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            font-size: 18px;
+        }
+
+        .demo-button.clear {
+            background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
+            font-size: 18px;
+        }
+
+        .screenshot-display {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .screenshot-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            margin: 20px 0;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-image:hover {
+            transform: scale(1.02);
+            border-color: #667eea;
+        }
+
+        .screenshot-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .screenshot-info h3 {
+            color: #e0e7ff;
+            margin-bottom: 10px;
+        }
+
+        .screenshot-info p {
+            color: #a0a9c0;
+            margin: 5px 0;
+        }
+
+        .links-found {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .links-found h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .link-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #a0a9c0;
+            word-break: break-all;
+        }
+
+        .link-item a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .link-item a:hover {
+            color: #e0e7ff;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: #00b894;
+            background: rgba(0, 184, 148, 0.05);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .server-status {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .server-status.connected {
+            background: rgba(0, 184, 148, 0.1);
+            color: #00b894;
+            border-color: rgba(0, 184, 148, 0.3);
+        }
+
+        .server-status.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .results-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .results-section h3 {
+            color: #e0e7ff;
+            margin-bottom: 15px;
+        }
+
+        .link-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #a0a9c0;
+        }
+
+        .server-config {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ NaviGrab Server-Based</h1>
+            <p>Cross-Origin Screenshot Capture & Link Analysis</p>
+        </div>
+
+        <div class="server-status" id="serverStatus">
+            <span class="loading-spinner"></span> Checking server connection...
+        </div>
+
+        <div class="control-panel">
+            <h2>🖥️ Server Configuration</h2>
+            <div class="server-config">
+                <div class="input-group">
+                    <label for="serverUrl">Server URL:</label>
+                    <input type="url" id="serverUrl" placeholder="http://localhost:8080" value="http://localhost:8080">
+                </div>
+                <div class="input-group">
+                    <label for="openaiApiKey">OpenAI API Key (optional):</label>
+                    <input type="password" id="openaiApiKey" placeholder="sk-...">
+                </div>
+                <button class="demo-button secondary" onclick="testServerConnection()">
+                    <span>🔗</span>
+                    Test Server Connection
+                </button>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2>📸 Screenshot Capture Options</h2>
+            <div class="input-group">
+                <label for="targetUrl">Target URL:</label>
+                <input type="url" id="targetUrl" placeholder="https://example.com" value="https://github.com">
+            </div>
+            <div class="button-grid">
+                <button class="demo-button capture" onclick="captureWithServer()">
+                    <span>📸</span>
+                    Capture with Server
+                </button>
+                <button class="demo-button secondary" onclick="captureCurrentPage()">
+                    <span>📷</span>
+                    Capture Current Page
+                </button>
+                <button class="demo-button primary" onclick="captureWithOpenAI()">
+                    <span>🤖</span>
+                    Capture + OpenAI Analysis
+                </button>
+                <button class="demo-button clear" onclick="clearAllData()">
+                    <span>🗑️</span>
+                    Clear All Data
+                </button>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2>📁 Upload Screenshot</h2>
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📁</div>
+                <h3>Click to upload or drag & drop</h3>
+                <p>Supported formats: PNG, JPEG, WebP, GIF</p>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2>🔗 Quick Test Links</h2>
+            <div class="button-grid">
+                <button class="demo-button external" onclick="captureWithServer('https://github.com')">
+                    <span>🐙</span>
+                    GitHub
+                </button>
+                <button class="demo-button external" onclick="captureWithServer('https://stackoverflow.com')">
+                    <span>📚</span>
+                    Stack Overflow
+                </button>
+                <button class="demo-button external" onclick="captureWithServer('https://news.ycombinator.com')">
+                    <span>🔥</span>
+                    Hacker News
+                </button>
+                <button class="demo-button external" onclick="captureWithServer('https://dev.to')">
+                    <span>💻</span>
+                    Dev.to
+                </button>
+                <button class="demo-button external" onclick="captureWithServer('https://reddit.com')">
+                    <span>🤖</span>
+                    Reddit
+                </button>
+                <button class="demo-button external" onclick="captureWithServer('https://medium.com')">
+                    <span>📝</span>
+                    Medium
+                </button>
+            </div>
+        </div>
+
+        <div class="screenshot-display" id="screenshotDisplay" style="display: none;">
+            <h2>📸 Captured Screenshot</h2>
+            <img id="screenshotImage" class="screenshot-image" alt="Screenshot" onclick="showScreenshotModal()">
+            <div class="screenshot-info" id="screenshotInfo">
+                <h3 id="screenshotTitle">Screenshot Title</h3>
+                <p id="screenshotUrl">URL</p>
+                <p id="screenshotStats">Stats</p>
+                <p id="screenshotTime">Time</p>
+            </div>
+        </div>
+
+        <div class="results-grid" id="resultsGrid" style="display: none;">
+            <div class="results-section">
+                <h3>🔗 Link Analysis</h3>
+                <div class="link-stats" id="linkStats"></div>
+                <div class="links-found" id="linksFound">
+                    <h4>📋 All Links Found:</h4>
+                    <div id="linksList"></div>
+                </div>
+            </div>
+            <div class="results-section">
+                <h3>📊 Analysis Results</h3>
+                <div id="analysisResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for full screenshot view -->
+    <div class="screenshot-modal" id="screenshotModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div style="max-width: 90%; max-height: 90%; background: white; border-radius: 15px; padding: 20px; position: relative;">
+            <button onclick="closeScreenshotModal()" style="position: absolute; top: 10px; right: 10px; background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">×</button>
+            <img id="modalScreenshot" alt="Full Screenshot" style="max-width: 100%; max-height: 100%;">
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            maxLinks: 50,
+            screenshotDelay: 2000,
+            compressionQuality: 0.8,
+            thumbnailSize: { width: 400, height: 300 }
+        };
+
+        let currentScreenshot = null;
+        let allScreenshots = [];
+        let serverConnected = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDragAndDrop();
+            loadSavedData();
+            testServerConnection();
+            updateStatus('✅ Ready to capture screenshots with server!', false, true);
+        });
+
+        // Setup drag and drop
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload({ target: { files: files } });
+                }
+            });
+        }
+
+        // Test server connection
+        async function testServerConnection() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const statusDiv = document.getElementById('serverStatus');
+            
+            try {
+                statusDiv.innerHTML = '<span class="loading-spinner"></span> Testing server connection...';
+                
+                const response = await fetch(`${serverUrl}/api/status`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.innerHTML = '✅ Server connected successfully!';
+                    statusDiv.className = 'server-status connected';
+                    serverConnected = true;
+                } else {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Server connection failed: ${error.message}`;
+                statusDiv.className = 'server-status error';
+                serverConnected = false;
+            }
+        }
+
+        // Status management
+        function updateStatus(message, isError = false, isSuccess = false, isWarning = false) {
+            const status = document.getElementById('status');
+            if (status) {
+                status.textContent = message;
+                status.className = isError ? 'status error' : 
+                                  (isSuccess ? 'status success' : 
+                                  (isWarning ? 'status warning' : 'status'));
+            }
+        }
+
+        // Capture with server
+        async function captureWithServer(url = null) {
+            const targetUrl = url || document.getElementById('targetUrl').value;
+            const serverUrl = document.getElementById('serverUrl').value;
+            
+            if (!targetUrl) {
+                updateStatus('❌ Please enter a URL to capture', true);
+                return;
+            }
+
+            if (!serverConnected) {
+                updateStatus('❌ Server not connected. Please test connection first.', true);
+                return;
+            }
+
+            try {
+                updateStatus(`📸 Capturing screenshot with server: ${targetUrl}`, false, false, true);
+                showProgress(10);
+                
+                const response = await fetch(`${serverUrl}/api/capture`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: targetUrl,
+                        options: {
+                            width: 1200,
+                            height: 800,
+                            fullPage: true
+                        }
+                    })
+                });
+
+                showProgress(60);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showProgress(100);
+                    
+                    if (result.success) {
+                        const screenshotData = {
+                            id: Date.now(),
+                            url: targetUrl,
+                            title: result.title || getPageTitle(targetUrl),
+                            base64: result.screenshot,
+                            links_found: result.links ? result.links.length : 0,
+                            buttons_found: result.buttons || 0,
+                            images_found: result.images || 0,
+                            links: result.links || [],
+                            timestamp: new Date().toISOString(),
+                            description: `Server-captured screenshot from ${new URL(targetUrl).hostname}`
+                        };
+                        
+                        currentScreenshot = screenshotData;
+                        allScreenshots.push(screenshotData);
+                        localStorage.setItem('navigrab_screenshots', JSON.stringify(allScreenshots));
+                        
+                        displayScreenshot(screenshotData);
+                        analyzeLinks(screenshotData);
+                        
+                        updateStatus(`✅ Screenshot captured successfully: ${screenshotData.title}`, false, true);
+                    } else {
+                        throw new Error(result.error || 'Unknown server error');
+                    }
+                } else {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Server capture failed:', error);
+                updateStatus(`❌ Server capture failed: ${error.message}`, true);
+                
+                // Fallback to current page capture
+                updateStatus('🔄 Falling back to current page capture...', false, false, true);
+                await captureCurrentPage();
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Capture with OpenAI
+        async function captureWithOpenAI(url = null) {
+            const targetUrl = url || document.getElementById('targetUrl').value;
+            const serverUrl = document.getElementById('serverUrl').value;
+            const apiKey = document.getElementById('openaiApiKey').value;
+            
+            if (!targetUrl) {
+                updateStatus('❌ Please enter a URL to capture', true);
+                return;
+            }
+
+            if (!serverConnected) {
+                updateStatus('❌ Server not connected. Please test connection first.', true);
+                return;
+            }
+
+            try {
+                updateStatus(`🤖 Capturing and analyzing with OpenAI: ${targetUrl}`, false, false, true);
+                showProgress(10);
+                
+                const response = await fetch(`${serverUrl}/api/screenshot-analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: targetUrl,
+                        analysis_type: 'comprehensive',
+                        custom_prompt: 'Analyze this webpage and provide detailed insights about its structure, content, and user experience.',
+                        api_key: apiKey
+                    })
+                });
+
+                showProgress(60);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showProgress(100);
+                    
+                    if (result.success) {
+                        const screenshotData = {
+                            id: Date.now(),
+                            url: targetUrl,
+                            title: result.title || getPageTitle(targetUrl),
+                            base64: result.screenshot || '',
+                            links_found: result.links ? result.links.length : 0,
+                            buttons_found: result.buttons || 0,
+                            images_found: result.images || 0,
+                            links: result.links || [],
+                            timestamp: new Date().toISOString(),
+                            description: `OpenAI-analyzed screenshot from ${new URL(targetUrl).hostname}`,
+                            analysis: result.analysis
+                        };
+                        
+                        currentScreenshot = screenshotData;
+                        allScreenshots.push(screenshotData);
+                        localStorage.setItem('navigrab_screenshots', JSON.stringify(allScreenshots));
+                        
+                        displayScreenshot(screenshotData);
+                        analyzeLinks(screenshotData);
+                        displayAnalysisResults(result);
+                        
+                        updateStatus(`✅ OpenAI analysis completed: ${screenshotData.title}`, false, true);
+                    } else {
+                        throw new Error(result.error_message || 'Unknown analysis error');
+                    }
+                } else {
+                    throw new Error(`Analysis error: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('OpenAI analysis failed:', error);
+                updateStatus(`❌ OpenAI analysis failed: ${error.message}`, true);
+                
+                // Fallback to regular capture
+                await captureWithServer(targetUrl);
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Capture current page
+        async function captureCurrentPage() {
+            try {
+                updateStatus('📷 Capturing current page...', false, false, true);
+                showProgress(20);
+                
+                if (typeof html2canvas !== 'undefined') {
+                    const canvas = await html2canvas(document.body, {
+                        height: Math.min(document.documentElement.scrollHeight, 2000),
+                        width: Math.min(document.documentElement.scrollWidth, 1200),
+                        useCORS: true,
+                        allowTaint: true,
+                        scale: 0.5,
+                        logging: false,
+                        backgroundColor: '#ffffff'
+                    });
+                    
+                    showProgress(60);
+                    
+                    const base64 = canvas.toDataURL('image/jpeg', CONFIG.compressionQuality);
+                    
+                    // Extract links from current page
+                    const links = Array.from(document.querySelectorAll('a[href]'))
+                        .slice(0, CONFIG.maxLinks)
+                        .map(link => ({
+                            text: link.textContent.trim().substring(0, 50),
+                            href: link.href,
+                            internal: link.href.includes(window.location.hostname)
+                        }));
+                    
+                    const buttons = document.querySelectorAll('button, [role="button"], input[type="submit"], input[type="button"]');
+                    const images = document.querySelectorAll('img');
+                    
+                    const screenshotData = {
+                        id: Date.now(),
+                        url: window.location.href,
+                        title: document.title || 'Current Page',
+                        base64: base64,
+                        links_found: links.length,
+                        buttons_found: buttons.length,
+                        images_found: images.length,
+                        links: links,
+                        timestamp: new Date().toISOString(),
+                        description: 'Screenshot of current page'
+                    };
+                    
+                    currentScreenshot = screenshotData;
+                    allScreenshots.push(screenshotData);
+                    localStorage.setItem('navigrab_screenshots', JSON.stringify(allScreenshots));
+                    
+                    showProgress(100);
+                    displayScreenshot(screenshotData);
+                    analyzeLinks(screenshotData);
+                    
+                    updateStatus('✅ Current page screenshot captured!', false, true);
+                } else {
+                    updateStatus('❌ html2canvas not available', true);
+                }
+            } catch (error) {
+                console.error('Error capturing current page:', error);
+                updateStatus(`❌ Error: ${error.message}`, true);
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Handle file upload
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                updateStatus('❌ Please select an image file', true);
+                return;
+            }
+            
+            try {
+                updateStatus('📁 Processing uploaded image...', false, false, true);
+                showProgress(20);
+                
+                const base64 = await fileToBase64(file);
+                showProgress(60);
+                
+                const screenshotData = {
+                    id: Date.now(),
+                    url: 'Uploaded Image',
+                    title: file.name,
+                    base64: base64,
+                    links_found: 0,
+                    buttons_found: 0,
+                    images_found: 1,
+                    links: [],
+                    timestamp: new Date().toISOString(),
+                    description: `Uploaded image: ${file.name}`
+                };
+                
+                currentScreenshot = screenshotData;
+                allScreenshots.push(screenshotData);
+                localStorage.setItem('navigrab_screenshots', JSON.stringify(allScreenshots));
+                
+                showProgress(100);
+                displayScreenshot(screenshotData);
+                
+                updateStatus(`✅ Image uploaded: ${file.name}`, false, true);
+            } catch (error) {
+                console.error('Upload error:', error);
+                updateStatus(`❌ Upload error: ${error.message}`, true);
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Convert file to base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // Display screenshot
+        function displayScreenshot(data) {
+            const display = document.getElementById('screenshotDisplay');
+            const image = document.getElementById('screenshotImage');
+            const title = document.getElementById('screenshotTitle');
+            const url = document.getElementById('screenshotUrl');
+            const stats = document.getElementById('screenshotStats');
+            const time = document.getElementById('screenshotTime');
+            
+            if (data.base64) {
+                image.src = data.base64;
+                image.alt = data.title;
+            }
+            
+            title.textContent = data.title;
+            url.textContent = data.url;
+            stats.textContent = `Links: ${data.links_found} | Buttons: ${data.buttons_found} | Images: ${data.images_found}`;
+            time.textContent = `Captured: ${new Date(data.timestamp).toLocaleString()}`;
+            
+            display.style.display = 'block';
+        }
+
+        // Analyze links
+        function analyzeLinks(data) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            const linkStats = document.getElementById('linkStats');
+            const linksList = document.getElementById('linksList');
+            
+            // Link statistics
+            const internalLinks = data.links.filter(link => link.internal).length;
+            const externalLinks = data.links.length - internalLinks;
+            
+            linkStats.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${data.links_found}</div>
+                    <div class="stat-label">Total Links</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${internalLinks}</div>
+                    <div class="stat-label">Internal</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${externalLinks}</div>
+                    <div class="stat-label">External</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.buttons_found}</div>
+                    <div class="stat-label">Buttons</div>
+                </div>
+            `;
+            
+            // Links list
+            linksList.innerHTML = data.links.map(link => 
+                `<div class="link-item">
+                    <a href="${link.href}" target="_blank">${link.text || link.href}</a>
+                    <span style="color: ${link.internal ? '#00b894' : '#ff6b6b'}; font-size: 0.8em; margin-left: 10px;">
+                        ${link.internal ? 'Internal' : 'External'}
+                    </span>
+                </div>`
+            ).join('');
+            
+            resultsGrid.style.display = 'grid';
+        }
+
+        // Display analysis results
+        function displayAnalysisResults(result) {
+            const analysisResults = document.getElementById('analysisResults');
+            
+            if (result.analysis) {
+                analysisResults.innerHTML = `
+                    <div class="screenshot-info">
+                        <h3>🤖 OpenAI Analysis</h3>
+                        <div style="background: rgba(0, 184, 148, 0.1); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                            <pre style="color: #a0a9c0; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.9em;">${result.analysis}</pre>
+                        </div>
+                    </div>
+                `;
+            } else {
+                analysisResults.innerHTML = `
+                    <div class="screenshot-info">
+                        <h3>📊 Analysis Results</h3>
+                        <p>No analysis results available.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Clear all screenshot data?')) {
+                currentScreenshot = null;
+                allScreenshots = [];
+                localStorage.removeItem('navigrab_screenshots');
+                document.getElementById('screenshotDisplay').style.display = 'none';
+                document.getElementById('resultsGrid').style.display = 'none';
+                updateStatus('🗑️ All data cleared!', false, true);
+            }
+        }
+
+        // Show screenshot modal
+        function showScreenshotModal() {
+            if (currentScreenshot && currentScreenshot.base64) {
+                const modal = document.getElementById('screenshotModal');
+                const img = document.getElementById('modalScreenshot');
+                img.src = currentScreenshot.base64;
+                img.alt = currentScreenshot.title;
+                modal.style.display = 'flex';
+            }
+        }
+
+        // Close screenshot modal
+        function closeScreenshotModal() {
+            document.getElementById('screenshotModal').style.display = 'none';
+        }
+
+        // Progress functions
+        function showProgress(percentage) {
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            progressBar.style.display = 'block';
+            progressFill.style.width = percentage + '%';
+        }
+
+        function hideProgress() {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.display = 'none';
+        }
+
+        // Utility functions
+        function getPageTitle(url) {
+            try {
+                const hostname = new URL(url).hostname;
+                if (hostname.includes('github.com')) return 'GitHub';
+                if (hostname.includes('stackoverflow.com')) return 'Stack Overflow';
+                if (hostname.includes('ycombinator.com')) return 'Hacker News';
+                if (hostname.includes('dev.to')) return 'Dev.to';
+                if (hostname.includes('reddit.com')) return 'Reddit';
+                if (hostname.includes('medium.com')) return 'Medium';
+                return hostname.replace('www.', '');
+            } catch (e) {
+                return 'Unknown Page';
+            }
+        }
+
+        // Load saved data
+        function loadSavedData() {
+            const saved = localStorage.getItem('navigrab_screenshots');
+            if (saved) {
+                try {
+                    allScreenshots = JSON.parse(saved);
+                    if (allScreenshots.length > 0) {
+                        currentScreenshot = allScreenshots[allScreenshots.length - 1];
+                        displayScreenshot(currentScreenshot);
+                        analyzeLinks(currentScreenshot);
+                        updateStatus('✅ Loaded saved screenshots', false, true);
+                    }
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

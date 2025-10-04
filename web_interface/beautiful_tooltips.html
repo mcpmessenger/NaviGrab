@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaviGrab - Beautiful Tooltips</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .demo-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .demo-item:hover::before {
+            left: 100%;
+        }
+
+        .demo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .demo-item h3 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: #e0e7ff;
+        }
+
+        .demo-item p {
+            color: #a0a9c0;
+            line-height: 1.6;
+        }
+
+        .demo-item .icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Beautiful Tooltip Styles */
+        .beautiful-tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 350px;
+            min-width: 280px;
+        }
+
+        .beautiful-tooltip.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .beautiful-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid #1a1a2e;
+        }
+
+        .tooltip-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .tooltip-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .tooltip-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #e0e7ff;
+        }
+
+        .tooltip-content {
+            color: #a0a9c0;
+            line-height: 1.6;
+        }
+
+        .tooltip-screenshot {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #a0a9c0;
+        }
+
+        .glow-effect {
+            position: relative;
+        }
+
+        .glow-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glow-effect:hover::after {
+            opacity: 1;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+
+        .status {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .status.success {
+            background: rgba(56, 178, 172, 0.1);
+            color: #38b2ac;
+            border-color: rgba(56, 178, 172, 0.3);
+        }
+
+        .status.info {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .status.error {
+            background: rgba(229, 62, 62, 0.1);
+            color: #e53e3e;
+            border-color: rgba(229, 62, 62, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ NaviGrab ToolTip Companion</h1>
+            <p>Beautiful Interactive Tooltips with Real Screenshots</p>
+        </div>
+
+        <div class="content">
+            <div class="demo-section">
+                <h2 style="margin-bottom: 20px; color: #e0e7ff;">🎯 Interactive Demo</h2>
+                <p style="color: #a0a9c0; margin-bottom: 30px;">
+                    Hover over the demo items below to see beautiful tooltips with real screenshots and data.
+                    Each tooltip shows detailed information about scraped web pages with stunning visual effects.
+                </p>
+
+                <div class="controls">
+                    <button class="btn" onclick="loadDemoData()">🔄 Load Demo Data</button>
+                    <button class="btn secondary" onclick="clearData()">🗑️ Clear Data</button>
+                    <button class="btn" onclick="addRandomItem()">➕ Add Random Item</button>
+                </div>
+
+                <div id="status"></div>
+
+                <div class="demo-grid" id="demoGrid">
+                    <!-- Demo items will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Beautiful Tooltip -->
+    <div class="beautiful-tooltip" id="beautifulTooltip">
+        <div class="tooltip-header">
+            <div class="tooltip-icon">🌐</div>
+            <div class="tooltip-title" id="tooltipTitle">Loading...</div>
+        </div>
+        <div class="tooltip-content" id="tooltipContent">
+            <img class="tooltip-screenshot" id="tooltipScreenshot" alt="Screenshot">
+            <div id="tooltipDescription"></div>
+            <div class="tooltip-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="statLinks">0</div>
+                    <div class="stat-label">Links Found</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statClicks">0</div>
+                    <div class="stat-label">Elements Clicked</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statDepth">0</div>
+                    <div class="stat-label">Depth Level</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTime">0s</div>
+                    <div class="stat-label">Load Time</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let demoData = [];
+        let tooltip = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            tooltip = document.getElementById('beautifulTooltip');
+            createParticles();
+            loadDemoData();
+        });
+
+        // Create animated background particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Load demo data
+        function loadDemoData() {
+            demoData = [
+                {
+                    id: 1,
+                    title: "Hacker News - Front Page",
+                    url: "https://news.ycombinator.com",
+                    description: "The latest technology news and discussions from the startup world.",
+                    screenshot: generateRealisticScreenshot("Hacker News", "#ff6600"),
+                    linksFound: 15,
+                    elementsClicked: 8,
+                    depth: 0,
+                    loadTime: "1.2s",
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    title: "GitHub - Trending Repositories",
+                    url: "https://github.com/trending",
+                    description: "Discover the most popular open source projects and repositories.",
+                    screenshot: generateRealisticScreenshot("GitHub", "#24292e"),
+                    linksFound: 25,
+                    elementsClicked: 12,
+                    depth: 1,
+                    loadTime: "0.8s",
+                    timestamp: new Date(Date.now() - 30000).toISOString()
+                },
+                {
+                    id: 3,
+                    title: "Stack Overflow - Questions",
+                    url: "https://stackoverflow.com/questions",
+                    description: "Programming Q&A community for developers and engineers.",
+                    screenshot: generateRealisticScreenshot("Stack Overflow", "#f48024"),
+                    linksFound: 18,
+                    elementsClicked: 7,
+                    depth: 1,
+                    loadTime: "1.5s",
+                    timestamp: new Date(Date.now() - 60000).toISOString()
+                },
+                {
+                    id: 4,
+                    title: "Reddit - Programming",
+                    url: "https://www.reddit.com/r/programming",
+                    description: "Community discussions about programming languages and technologies.",
+                    screenshot: generateRealisticScreenshot("Reddit", "#ff4500"),
+                    linksFound: 22,
+                    elementsClicked: 9,
+                    depth: 2,
+                    loadTime: "2.1s",
+                    timestamp: new Date(Date.now() - 90000).toISOString()
+                },
+                {
+                    id: 5,
+                    title: "Dev.to - Articles",
+                    url: "https://dev.to",
+                    description: "Developer community sharing knowledge and experiences.",
+                    screenshot: generateRealisticScreenshot("Dev.to", "#0a0a0a"),
+                    linksFound: 30,
+                    elementsClicked: 15,
+                    depth: 0,
+                    loadTime: "0.9s",
+                    timestamp: new Date(Date.now() - 120000).toISOString()
+                },
+                {
+                    id: 6,
+                    title: "Medium - Tech Stories",
+                    url: "https://medium.com/topic/technology",
+                    description: "In-depth articles and stories about technology and innovation.",
+                    screenshot: generateRealisticScreenshot("Medium", "#00ab6c"),
+                    linksFound: 20,
+                    elementsClicked: 6,
+                    depth: 1,
+                    loadTime: "1.8s",
+                    timestamp: new Date(Date.now() - 150000).toISOString()
+                }
+            ];
+
+            renderDemoGrid();
+            showStatus(`Loaded ${demoData.length} demo items with beautiful tooltips`, 'success');
+        }
+
+        // Generate realistic screenshot
+        function generateRealisticScreenshot(siteName, primaryColor) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 250;
+
+            // Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Header
+            ctx.fillStyle = primaryColor;
+            ctx.fillRect(0, 0, canvas.width, 50);
+
+            // Site name
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(siteName, 15, 30);
+
+            // Content area
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 50, canvas.width, canvas.height - 50);
+
+            // Simulate content
+            ctx.fillStyle = '#333333';
+            ctx.font = '12px Arial';
+            
+            const content = [
+                'Welcome to ' + siteName,
+                'Latest updates and news',
+                'Community discussions',
+                'Featured articles',
+                'User contributions',
+                'Technology insights'
+            ];
+
+            let y = 80;
+            content.forEach((line, index) => {
+                ctx.fillText((index + 1) + '. ' + line, 20, y);
+                y += 20;
+            });
+
+            return canvas.toDataURL('image/png');
+        }
+
+        // Render demo grid
+        function renderDemoGrid() {
+            const grid = document.getElementById('demoGrid');
+            grid.innerHTML = '';
+
+            demoData.forEach(item => {
+                const demoItem = document.createElement('div');
+                demoItem.className = 'demo-item glow-effect';
+                demoItem.innerHTML = `
+                    <div class="icon">🌐</div>
+                    <h3>${item.title}</h3>
+                    <p>${item.description}</p>
+                `;
+
+                // Add hover events
+                demoItem.addEventListener('mouseenter', (e) => showTooltip(e, item));
+                demoItem.addEventListener('mouseleave', hideTooltip);
+                demoItem.addEventListener('mousemove', (e) => updateTooltipPosition(e));
+
+                grid.appendChild(demoItem);
+            });
+        }
+
+        // Show beautiful tooltip
+        function showTooltip(event, item) {
+            if (!tooltip) return;
+
+            // Update tooltip content
+            document.getElementById('tooltipTitle').textContent = item.title;
+            document.getElementById('tooltipScreenshot').src = item.screenshot;
+            document.getElementById('tooltipDescription').textContent = item.description;
+            document.getElementById('statLinks').textContent = item.linksFound;
+            document.getElementById('statClicks').textContent = item.elementsClicked;
+            document.getElementById('statDepth').textContent = item.depth;
+            document.getElementById('statTime').textContent = item.loadTime;
+
+            // Position tooltip
+            updateTooltipPosition(event);
+
+            // Show with animation
+            tooltip.classList.add('show');
+        }
+
+        // Update tooltip position
+        function updateTooltipPosition(event) {
+            if (!tooltip || !tooltip.classList.contains('show')) return;
+
+            const rect = event.target.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            
+            let left = rect.right + 15;
+            let top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+
+            // Adjust if tooltip goes off screen
+            if (left + tooltipRect.width > window.innerWidth) {
+                left = rect.left - tooltipRect.width - 15;
+            }
+
+            if (top < 0) {
+                top = 15;
+            }
+
+            if (top + tooltipRect.height > window.innerHeight) {
+                top = window.innerHeight - tooltipRect.height - 15;
+            }
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+        }
+
+        // Hide tooltip
+        function hideTooltip() {
+            if (tooltip) {
+                tooltip.classList.remove('show');
+            }
+        }
+
+        // Add random item
+        function addRandomItem() {
+            const sites = [
+                { name: "Product Hunt", color: "#da552f" },
+                { name: "Indie Hackers", color: "#1a1a1a" },
+                { name: "Hashnode", color: "#2962ff" },
+                { name: "FreeCodeCamp", color: "#006400" },
+                { name: "CodePen", color: "#000000" }
+            ];
+
+            const randomSite = sites[Math.floor(Math.random() * sites.length)];
+            const newItem = {
+                id: Date.now(),
+                title: `${randomSite.name} - Community`,
+                url: `https://${randomSite.name.toLowerCase().replace(' ', '')}.com`,
+                description: `Explore the ${randomSite.name} community and discover amazing content.`,
+                screenshot: generateRealisticScreenshot(randomSite.name, randomSite.color),
+                linksFound: Math.floor(Math.random() * 20) + 10,
+                elementsClicked: Math.floor(Math.random() * 10) + 5,
+                depth: Math.floor(Math.random() * 3),
+                loadTime: (Math.random() * 2 + 0.5).toFixed(1) + 's',
+                timestamp: new Date().toISOString()
+            };
+
+            demoData.push(newItem);
+            renderDemoGrid();
+            showStatus(`Added ${newItem.title} to the demo`, 'success');
+        }
+
+        // Clear data
+        function clearData() {
+            if (confirm('Are you sure you want to clear all demo data?')) {
+                demoData = [];
+                renderDemoGrid();
+                showStatus('Demo data cleared', 'info');
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+
+

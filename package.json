@@ -1,0 +1,27 @@
+{
+  "name": "navigrab-screenshot-server",
+  "version": "1.0.0",
+  "description": "NaviGrab Screenshot Capture Server with CORS bypass",
+  "main": "screenshot_server.js",
+  "scripts": {
+    "start": "node screenshot_server.js",
+    "dev": "nodemon screenshot_server.js",
+    "install-deps": "npm install express puppeteer"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "puppeteer": "^21.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "keywords": [
+    "screenshot",
+    "puppeteer",
+    "cors",
+    "web-scraping",
+    "navigrab"
+  ],
+  "author": "NaviGrab Team",
+  "license": "MIT"
+}

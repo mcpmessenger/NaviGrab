@@ -1,0 +1,129 @@
+/* NaviGrab Universal Tooltip Styles */
+/* These styles are injected into every website */
+
+.navigrab-tooltip {
+    position: fixed !important;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    border-radius: 15px !important;
+    padding: 20px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(20px) !important;
+    z-index: 999999 !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    transform: translateY(10px) scale(0.95) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    max-width: 350px !important;
+    min-width: 280px !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    color: white !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+.navigrab-tooltip.show {
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+.navigrab-tooltip::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -8px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 8px solid transparent !important;
+    border-right: 8px solid transparent !important;
+    border-bottom: 8px solid #1a1a2e !important;
+}
+
+.navigrab-tooltip-header {
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 15px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.3) !important;
+}
+
+.navigrab-tooltip-icon {
+    width: 40px !important;
+    height: 40px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: 15px !important;
+    font-size: 1.2em !important;
+}
+
+.navigrab-tooltip-title {
+    font-size: 1.2em !important;
+    font-weight: 600 !important;
+    color: #e0e7ff !important;
+    margin: 0 !important;
+}
+
+.navigrab-tooltip-screenshot {
+    width: 100% !important;
+    height: 150px !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+    margin: 15px 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.navigrab-tooltip-content {
+    color: #a0a9c0 !important;
+}
+
+.navigrab-tooltip-description {
+    margin-bottom: 15px !important;
+    font-size: 0.9em !important;
+    line-height: 1.5 !important;
+}
+
+.navigrab-tooltip-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-top: 15px !important;
+}
+
+.navigrab-stat-item {
+    background: rgba(102, 126, 234, 0.1) !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    border: 1px solid rgba(102, 126, 234, 0.2) !important;
+}
+
+.navigrab-stat-value {
+    font-size: 1.1em !important;
+    font-weight: 600 !important;
+    color: #667eea !important;
+    margin: 0 !important;
+}
+
+.navigrab-stat-label {
+    font-size: 0.9em !important;
+    color: #a0a9c0 !important;
+    margin: 0 !important;
+}
+
+/* Ensure tooltip is always on top */
+.navigrab-tooltip * {
+    box-sizing: border-box !important;
+}
+
+/* Hide tooltip when printing */
+@media print {
+    .navigrab-tooltip {
+        display: none !important;
+    }
+}
+
+

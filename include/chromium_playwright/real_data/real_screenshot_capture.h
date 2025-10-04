@@ -6,7 +6,7 @@
 #include <memory>
 #include <chrono>
 #include <set>
-#include "screenshot_capture.h"
+#include "chromium_playwright/screenshot_capture.h"
 
 namespace chromium_playwright::real_data {
 
